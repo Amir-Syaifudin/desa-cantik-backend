@@ -1,5 +1,4 @@
 # Desa Cantik API
-
 **Sistem Informasi Desa Cinta Statistik Toraja Utara**  
 Backend API - Laravel 12 | PHP 8.2 | MySQL 8.0
 
