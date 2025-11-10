@@ -8,22 +8,27 @@ Backend API - Laravel 12 | PHP 8.2 | MySQL 8.0
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com)
 
 ---
-
 ## Daftar Isi
 
-- [Tentang Proyek](#-tentang-proyek)
-- [Tim Pengembang](#-tim-pengembang)
-- [Tech Stack](#-tech-stack)
-- [Fitur Utama](#-fitur-utama)
-- [Prerequisites](#-prerequisites)
-- [Quick Start](#-quick-start)
-- [Struktur Database](#-struktur-database)
-- [Test Credentials](#-test-credentials)
-- [Development Workflow](#-development-workflow)
-- [API Documentation](#-api-documentation)
-- [Troubleshooting](#-troubleshooting)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Tentang Proyek](#tentang-proyek)
+- [Tim Pengembang](#tim-pengembang)
+- [Tech Stack](#tech-stack)
+- [Fitur Utama](#fitur-utama)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Struktur Database](#struktur-database)
+- [Test Credentials](#test-credentials)
+- [Development Workflow](#development-workflow)
+- [API Documentation](#api-documentation)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [Documentation](#documentation)
+- [Project Structure](#project-structure)
+- [Security](#security)
+- [License](#license)
+- [Contact & Support](#contact--support)
+- [Acknowledgments](#acknowledgments)
+- [Project Stats](#project-stats)
 
 ---
 
@@ -640,7 +645,6 @@ Untuk keperluan pendidikan dan penelitian. Tidak untuk penggunaan komersial tanp
 ## Acknowledgments
 
 Terima kasih kepada:
-
 - **Tim Desa Cantik BPS Kabupaten Toraja Utara** atas segala dukungan dan sumber daya yang diberikan.
 - **Dosen Pembimbing** atas segala bimbingan dan petunjuk yang diberikan.
 - **Politeknik Statistika STIS**
@@ -659,11 +663,8 @@ Terima kasih kepada:
 ---
 
 <div align="center">
-
 ### **Dibangun dengan lancar dan nyaman oleh Tim 4 Kelas 3SI1**
-
 **Politeknik Statistika STIS • Jakarta • 2025**
 
 [Documentation](docs/) • [Report Bug](https://git.stis.ac.id/rpl-lancarnyaman/desa-cantik-api/-/issues) • [Request Feature](https://git.stis.ac.id/rpl-lancarnyaman/desa-cantik-api/-/issues)
-
 </div>
