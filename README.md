@@ -28,16 +28,35 @@ php artisan test
 - Node.js/Vite tidak lagi diperlukan. Jika membutuhkan antarmuka pengguna, kelola di repositori terpisah.
 
 ## Menjalankan dengan Docker
-1. Pastikan Docker & Docker Compose terpasang.
-2. Sesuaikan variabel lingkungan pada `.env` agar selaras dengan konfigurasi `docker-compose.yml` (terutama host, port, dan kredensial MySQL).
-3. Bangun dan jalankan seluruh layanan (PHP-FPM, Nginx, MySQL) menggunakan:
+1. Pastikan Docker atau Podman & Docker Compose/Podman Compose terpasang.
+2. Salin berkas lingkungan:
+   ```bash
+   cp .env.example .env
+   ```
+3. Sesuaikan variabel lingkungan pada `.env` agar selaras dengan konfigurasi `docker-compose.yml` (terutama `DB_HOST=mysql`, `DB_PORT=3306`, `DB_DATABASE=desa_cantik_db`, `DB_USERNAME=desa_cantik_user`, `DB_PASSWORD=DesaCantik2025!`).
+4. Bangun dan jalankan seluruh layanan (PHP-FPM, Nginx, MySQL):
    ```bash
    docker-compose up -d --build
+   # atau jika menggunakan Podman:
+   # podman compose up -d --build
    ```
    - Service `app` dibangun dari `docker/php/Dockerfile`.
    - Nginx pada service `nginx` memetakan port `8000:80`.
-   - MySQL menyimpan data di volume `mysql_data`.
-4. Hentikan layanan bila diperlukan:
+   - MySQL menyimpan data di volume `mysql_data` dan terpapar pada port host (sesuai `docker-compose.yml`, misalnya 3400).
+5. Pasang dependensi PHP di dalam container:
+   ```bash
+   docker-compose exec app composer install
+   ```
+6. Generate kunci aplikasi Laravel:
+   ```bash
+   docker-compose exec app php artisan key:generate
+   ```
+7. Jalankan migrasi basis data:
+   ```bash
+   docker-compose exec app php artisan migrate
+   ```
+8. Akses aplikasi di `http://localhost:8000` (akan menampilkan health check JSON).
+9. Hentikan layanan bila diperlukan:
    ```bash
    docker-compose down
    ```

@@ -39,7 +39,7 @@ services:
       MYSQL_USER: desa_cantik_user
       MYSQL_PASSWORD: DesaCantik2025!
     ports:
-      - "3306:3306"
+      - "3400:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
