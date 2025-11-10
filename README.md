@@ -403,7 +403,7 @@ POST   /api/desa/{id}/data      - Add statistical data
 GET    /api/desa/{id}/data      - Get desa statistics
 ```
 
-**Full API documentation:** Coming in Sprint 2-3
+**Full API documentation:**
 
 ---
 
@@ -547,16 +547,16 @@ docker-compose exec app php artisan test --coverage
 
 ### Project Documents
 
-- [Laporan Milestone 2](docs/Laporan-Progres-Milestone-2_3SI1_Tim-4.pdf) - Design & Architecture
-- [Database ERD](docs/database-erd.png) - Entity Relationship Diagram
-- [API Specification](docs/api-specification.yaml) - OpenAPI 3.0 Spec
+- [Laporan Milestone 2](docs/Laporan-Progres-Milestone-2_3SI1_Tim-4.pdf)
+- **Database ERD**, lihat di Laporan Milestone 2 (halaman 48-49)
+- **API Specification**, dalam pengembangan
 
 ### Additional Resources
 
 - [Laravel 12 Documentation](https://laravel.com/docs/12.x)
 - [Docker Documentation](https://docs.docker.com)
 - [GitLab CI/CD Guide](https://docs.gitlab.com/ee/ci/)
-- [JWT Auth Package](https://jwt-auth.readthedocs.io)
+- [Sanctum Documentation](https://laravel.com/docs/12.x/sanctum)
 
 ---
 
@@ -617,7 +617,7 @@ Jika menemukan security issue, **JANGAN** buat public issue. Hubungi:
 
 ## License
 
-Proyek ini dikembangkan untuk keperluan akademik:
+Proyek ini dikembangkan untuk keperluan akademik dengan lisensi sebagai berikut.
 
 **Copyright © 2025 Tim 4 - Kelas 3SI1**  
 **Politeknik Statistika STIS**
@@ -628,11 +628,11 @@ Untuk keperluan pendidikan dan penelitian. Tidak untuk penggunaan komersial tanp
 
 ## Contact & Support
 
-### Tim Support
+### Support
 
-- **Technical Issues:** Create GitLab Issue
-- **Questions:** Contact Lead Developer
-- **Documentation:** Check `/docs` folder
+- **Technical Issues:** Buat GitLab Issue
+- **Questions:** Hubungi Project Manager atau Lead Backend Developer
+- **Documentation:** Periksa di folder `/docs`
 
 ### Links
 
@@ -663,8 +663,11 @@ Terima kasih kepada:
 ---
 
 <div align="center">
-### **Dibangun dengan lancar dan nyaman oleh Tim 4 Kelas 3SI1**
+
+### Dibangun dengan lancar dan nyaman oleh Tim 4 Kelas 3SI1
+
 **Politeknik Statistika STIS • Jakarta • 2025**
 
 [Documentation](docs/) • [Report Bug](https://git.stis.ac.id/rpl-lancarnyaman/desa-cantik-api/-/issues) • [Request Feature](https://git.stis.ac.id/rpl-lancarnyaman/desa-cantik-api/-/issues)
+
 </div>
