@@ -22,11 +22,37 @@ class VillageStatisticService
 {
     public function import(Village $village, UploadedFile $file, User $user): array
     {
+        // Validate file before processing
+        $this->validateImportFile($file);
+
         $import = new VillageStatisticRowsImport();
-        Excel::import($import, $file);
+
+        try {
+            Excel::import($import, $file);
+        } catch (Throwable $e) {
+            report($e);
+            throw ValidationException::withMessages([
+                'file' => 'File tidak dapat diproses. Pastikan format file sesuai dengan template.',
+            ]);
+        }
 
         /** @var Collection<int, array<string, mixed>> $rows */
         $rows = $import->rows ?? collect();
+
+        // Check if file has data
+        if ($rows->isEmpty()) {
+            throw ValidationException::withMessages([
+                'file' => 'File tidak memiliki data. Pastikan file berisi data statistik.',
+            ]);
+        }
+
+        // Check row limit to prevent memory issues
+        $maxRows = config('excel.imports.max_rows', 5000);
+        if ($rows->count() > $maxRows) {
+            throw ValidationException::withMessages([
+                'file' => "File terlalu besar. Maksimal {$maxRows} baris data.",
+            ]);
+        }
 
         $summary = [
             'total_rows' => $rows->count(),
@@ -71,12 +97,35 @@ class VillageStatisticService
                 $summary['failed']++;
                 $summary['errors'][] = [
                     'row' => $rowNumber,
-                    'error' => 'Terjadi kesalahan saat menyimpan data',
+                    'error' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
                 ];
             }
         }
 
         return $summary;
+    }
+
+    /**
+     * Validate import file before processing
+     */
+    protected function validateImportFile(UploadedFile $file): void
+    {
+        $maxSize = 10 * 1024 * 1024; // 10MB in bytes
+
+        if ($file->getSize() > $maxSize) {
+            throw ValidationException::withMessages([
+                'file' => 'Ukuran file terlalu besar. Maksimal 10MB.',
+            ]);
+        }
+
+        $allowedMimes = ['text/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+        $allowedExtensions = ['csv', 'xlsx', 'xls'];
+
+        if (!in_array($file->getMimeType(), $allowedMimes) && !in_array($file->getClientOriginalExtension(), $allowedExtensions)) {
+            throw ValidationException::withMessages([
+                'file' => 'Format file tidak didukung. Gunakan CSV atau Excel (xlsx/xls).',
+            ]);
+        }
     }
 
     public function export(Village $village, string $format, ?int $year = null): BinaryFileResponse
@@ -95,7 +144,7 @@ class VillageStatisticService
 
         $statistics = $village->statistics()
             ->with('statisticType')
-            ->when($year, fn ($query) => $query->where('year', $year))
+            ->when($year, fn($query) => $query->where('year', $year))
             ->orderBy('year')
             ->orderBy('indicator_name')
             ->get();

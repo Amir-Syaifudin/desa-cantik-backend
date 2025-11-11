@@ -17,13 +17,77 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+/**
+ * @OA\Info(
+ *     title="Desa Cantik API",
+ *     version="1.0.0",
+ *     description="API untuk Sistem Informasi Desa Cantik (Desa Cinta Statistik)",
+ *     @OA\Contact(
+ *         email="support@bpstorut.go.id",
+ *         name="BPS Kabupaten Toraja Utara"
+ *     )
+ * )
+ *
+ * @OA\Server(
+ *     url="/api/v1",
+ *     description="API Server"
+ * )
+ *
+ * @OA\SecurityScheme(
+ *     securityScheme="sanctum",
+ *     type="http",
+ *     scheme="bearer",
+ *     bearerFormat="Token"
+ * )
+ */
 class VillageStatisticController extends Controller
 {
     public function __construct(
         private VillageStatisticService $service,
-    ) {
-    }
+    ) {}
 
+    /**
+     * @OA\Get(
+     *     path="/villages/{village}/statistics",
+     *     summary="List village statistics",
+     *     description="Get paginated list of village statistics with optional filters",
+     *     tags={"Village Statistics"},
+     *     @OA\Parameter(
+     *         name="village",
+     *         in="path",
+     *         required=true,
+     *         description="Village ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="year",
+     *         in="query",
+     *         description="Filter by year",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="statistic_type_id",
+     *         in="query",
+     *         description="Filter by statistic type",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Items per page (max 100)",
+     *         @OA\Schema(type="integer", default=15)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items()),
+     *             @OA\Property(property="meta", type="object")
+     *         )
+     *     )
+     * )
+     */
     public function index(Request $request, Village $village): JsonResponse
     {
         $perPage = (int) $request->query('per_page', 15);
@@ -32,8 +96,8 @@ class VillageStatisticController extends Controller
         $statistics = VillageStatistic::query()
             ->with(['statisticType', 'creator'])
             ->where('village_id', $village->id)
-            ->when($request->filled('year'), fn ($query) => $query->where('year', $request->query('year')))
-            ->when($request->filled('statistic_type_id'), fn ($query) => $query->where('statistic_type_id', $request->query('statistic_type_id')))
+            ->when($request->filled('year'), fn($query) => $query->where('year', $request->query('year')))
+            ->when($request->filled('statistic_type_id'), fn($query) => $query->where('statistic_type_id', $request->query('statistic_type_id')))
             ->orderByDesc('year')
             ->orderBy('indicator_name')
             ->paginate($perPage)
@@ -60,7 +124,7 @@ class VillageStatisticController extends Controller
         $statistics = VillageStatistic::query()
             ->with('statisticType')
             ->where('village_id', $village->id)
-            ->when($year, fn ($query) => $query->where('year', $year))
+            ->when($year, fn($query) => $query->where('year', $year))
             ->get();
 
         $effectiveYear = $year ?? $statistics->max('year');
