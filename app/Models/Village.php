@@ -23,4 +23,9 @@ class Village extends Model
     {
         return $this -> hasMany(GeospatialData::class);
     }
+
+    public function thematic_maps()
+    {
+        return $this -> hasMany(ThematicMap::class);
+    }
 }
