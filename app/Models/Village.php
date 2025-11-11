@@ -13,4 +13,9 @@ class Village extends Model
         'location',
         'is_active',
     ];
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
 }
