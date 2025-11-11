@@ -53,14 +53,14 @@ Backend API - Laravel 12 | PHP 8.2 | MySQL 8.0
 
 **Tim 4 Kelas 3SI1**
 
-| Nama | NIM | Role |
-|------|-----|------|
-| **Teguh Christianto Simbolon** | 222313403 | Project Manager, Backend Developer |
-| **Alif Zakiansyah As Syauqi** | 222312958 | Lead Backend Developer |
-| **Ahmad Adib Husaini Al Munawwar** | 222312948 | Backend Developer |
-| **Amir Syaifudin** | 222312968 | Lead Frontend Developer |
-| **Anggita Cristin Meylani** | 222312982 | Frontend Developer |
-| **Nyimas Virna Salsa Lestari Risqia** | 222313307 | Frontend Developer |
+| Nama                                  | NIM       | Role                               |
+| ------------------------------------- | --------- | ---------------------------------- |
+| **Teguh Christianto Simbolon**        | 222313403 | Project Manager, Backend Developer |
+| **Alif Zakiansyah As Syauqi**         | 222312958 | Lead Backend Developer             |
+| **Ahmad Adib Husaini Al Munawwar**    | 222312948 | Backend Developer                  |
+| **Amir Syaifudin**                    | 222312968 | Lead Frontend Developer            |
+| **Anggita Cristin Meylani**           | 222312982 | Frontend Developer                 |
+| **Nyimas Virna Salsa Lestari Risqia** | 222313307 | Frontend Developer                 |
 
 **Institusi:** Politeknik Statistika STIS Program Studi D-IV Komputasi Statistik
 
@@ -232,19 +232,19 @@ http://localhost:8000
 
 ### Tabel Aplikasi (11 tabel)
 
-| Tabel | Deskripsi | Relasi |
-|-------|-----------|--------|
-| **roles** | Role user (Pegawai BPS, Perangkat Desa, Masyarakat) | → users |
-| **desa** | Master data desa | → users, desa_profiles, desa_modules, dll |
-| **users** | Akun pengguna sistem | ← roles, ← desa |
-| **desa_profiles** | Profil lengkap desa (1:1) | ← desa |
-| **desa_modules** | Aktivasi modul per desa | ← desa |
-| **indicators** | Master indikator statistik | → desa_indicator_data |
-| **desa_indicator_data** | Data statistik time-series | ← desa, ← indicators |
-| **publications** | File publikasi PDF | ← desa |
-| **geospatial_data** | GeoJSON boundary desa | ← desa |
-| **thematic_maps** | Layer peta tematik | ← desa |
-| **thematic_indicators** | Junction table (maps ↔ indicators) | ← thematic_maps, ← indicators |
+| Tabel                   | Deskripsi                                           | Relasi                                    |
+| ----------------------- | --------------------------------------------------- | ----------------------------------------- |
+| **user_roles**          | Role user (Pegawai BPS, Perangkat Desa, Masyarakat) | → users                                   |
+| **desa**                | Master data desa                                    | → users, desa_profiles, desa_modules, dll |
+| **users**               | Akun pengguna sistem                                | ← roles, ← desa                           |
+| **desa_profiles**       | Profil lengkap desa (1:1)                           | ← desa                                    |
+| **desa_modules**        | Aktivasi modul per desa                             | ← desa                                    |
+| **indicators**          | Master indikator statistik                          | → desa_indicator_data                     |
+| **desa_indicator_data** | Data statistik time-series                          | ← desa, ← indicators                      |
+| **publications**        | File publikasi PDF                                  | ← desa                                    |
+| **geospatial_data**     | GeoJSON boundary desa                               | ← desa                                    |
+| **thematic_maps**       | Layer peta tematik                                  | ← desa                                    |
+| **thematic_indicators** | Junction table (maps ↔ indicators)                  | ← thematic_maps, ← indicators             |
 
 ### Tabel Laravel System (8 tabel)
 
