@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\VillageAccessDeniedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ImportVillageStatisticsRequest;
 use App\Http\Requests\StoreVillageStatisticRequest;
@@ -94,7 +95,26 @@ class VillageStatisticController extends Controller
         $perPage = $perPage > 0 ? min($perPage, 100) : 15;
 
         $statistics = VillageStatistic::query()
-            ->with(['statisticType', 'creator'])
+            ->select([
+                'id',
+                'village_id',
+                'statistic_type_id',
+                'indicator_name',
+                'value',
+                'unit',
+                'year',
+                'period',
+                'source',
+                'notes',
+                'created_by',
+                'updated_by',
+                'created_at',
+                'updated_at'
+            ])
+            ->with([
+                'statisticType:id,name,code,category,description,display_order',
+                'creator:id,full_name,name'
+            ])
             ->where('village_id', $village->id)
             ->when($request->filled('year'), fn($query) => $query->where('year', $request->query('year')))
             ->when($request->filled('statistic_type_id'), fn($query) => $query->where('statistic_type_id', $request->query('statistic_type_id')))
@@ -122,7 +142,8 @@ class VillageStatisticController extends Controller
         $year = $request->query('year');
 
         $statistics = VillageStatistic::query()
-            ->with('statisticType')
+            ->select(['id', 'village_id', 'statistic_type_id', 'indicator_name', 'value', 'unit', 'year'])
+            ->with('statisticType:id,name,code,category,description,display_order')
             ->where('village_id', $village->id)
             ->when($year, fn($query) => $query->where('year', $year))
             ->get();
@@ -175,7 +196,10 @@ class VillageStatisticController extends Controller
             'created_by' => $user->id,
         ]);
 
-        $statistic->load(['statisticType', 'creator']);
+        $statistic->load([
+            'statisticType:id,name,code,category,description,display_order',
+            'creator:id,full_name,name'
+        ]);
 
         return response()->json([
             'success' => true,
@@ -195,7 +219,11 @@ class VillageStatisticController extends Controller
         $statistic->fill($data);
         $statistic->updated_by = $user->id;
         $statistic->save();
-        $statistic->load(['statisticType', 'creator', 'updater']);
+        $statistic->load([
+            'statisticType:id,name,code,category,description,display_order',
+            'creator:id,full_name,name',
+            'updater:id,full_name,name'
+        ]);
 
         return response()->json([
             'success' => true,
@@ -263,7 +291,7 @@ class VillageStatisticController extends Controller
             return;
         }
 
-        abort(403, 'Anda tidak memiliki akses ke desa ini.');
+        throw new VillageAccessDeniedException();
     }
 
     protected function findStatisticOrFail(Village $village, int $statisticId): VillageStatistic

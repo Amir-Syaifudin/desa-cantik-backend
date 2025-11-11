@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\FileUploadException;
 use App\Exports\VillageStatisticsExport;
 use App\Imports\VillageStatisticRowsImport;
 use App\Models\StatisticType;
@@ -31,9 +32,11 @@ class VillageStatisticService
             Excel::import($import, $file);
         } catch (Throwable $e) {
             report($e);
-            throw ValidationException::withMessages([
-                'file' => 'File tidak dapat diproses. Pastikan format file sesuai dengan template.',
-            ]);
+            throw new FileUploadException(
+                'File tidak dapat diproses. Pastikan format file sesuai dengan template.',
+                'FILE_UPLOAD_ERROR',
+                422
+            );
         }
 
         /** @var Collection<int, array<string, mixed>> $rows */
@@ -110,21 +113,25 @@ class VillageStatisticService
      */
     protected function validateImportFile(UploadedFile $file): void
     {
-        $maxSize = 10 * 1024 * 1024; // 10MB in bytes
+        $maxSize = 5 * 1024 * 1024; // 5MB in bytes
 
         if ($file->getSize() > $maxSize) {
-            throw ValidationException::withMessages([
-                'file' => 'Ukuran file terlalu besar. Maksimal 10MB.',
-            ]);
+            throw new FileUploadException(
+                'Ukuran file terlalu besar. Maksimal 5MB.',
+                'FILE_TOO_LARGE',
+                413
+            );
         }
 
         $allowedMimes = ['text/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
         $allowedExtensions = ['csv', 'xlsx', 'xls'];
 
         if (!in_array($file->getMimeType(), $allowedMimes) && !in_array($file->getClientOriginalExtension(), $allowedExtensions)) {
-            throw ValidationException::withMessages([
-                'file' => 'Format file tidak didukung. Gunakan CSV atau Excel (xlsx/xls).',
-            ]);
+            throw new FileUploadException(
+                'Format file tidak didukung. Gunakan CSV atau Excel (xlsx/xls).',
+                'INVALID_FILE_TYPE',
+                400
+            );
         }
     }
 

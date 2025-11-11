@@ -31,8 +31,8 @@ class StatisticType extends Model
             self::clearCache();
         });
 
-        static::updated(function () {
-            self::clearCache();
+        static::updated(function ($model) {
+            self::clearCache($model);
         });
 
         static::deleted(function () {
@@ -40,15 +40,23 @@ class StatisticType extends Model
         });
     }
 
-    public static function clearCache(): void
+    public static function clearCache($model = null): void
     {
         // Clear all statistic type caches
         Cache::forget('statistic_types_all');
 
         // Clear category-specific caches
-        // Note: In production, you might want to track which categories exist
-        // For now, we clear the main cache
-        Cache::flush(); // Use with caution in production with shared cache
+        if ($model && $model->category) {
+            Cache::forget("statistic_types_{$model->category}");
+        }
+
+        // If we don't have a specific model, clear all known categories
+        if (!$model) {
+            $categories = ['kependudukan', 'ekonomi', 'kesehatan', 'pendidikan', 'sosial', 'infrastruktur'];
+            foreach ($categories as $category) {
+                Cache::forget("statistic_types_{$category}");
+            }
+        }
     }
 
     public function statistics(): HasMany
