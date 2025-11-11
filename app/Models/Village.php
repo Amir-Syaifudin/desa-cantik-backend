@@ -28,4 +28,9 @@ class Village extends Model
     {
         return $this -> hasMany(ThematicMap::class);
     }
+
+    public function modules()
+    {
+        return $this -> hasMany(Module::class);
+    }
 }

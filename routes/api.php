@@ -6,6 +6,7 @@ use App\Http\Controllers\VillageController;
 use App\Http\Controllers\VillageProfileController;
 use App\Http\Controllers\GeospatialDataController;
 use App\Http\Controllers\ThematicMapsController;
+use App\Http\Controllers\VillageModuleController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -82,4 +83,10 @@ Route::delete('/thematic-maps/{id}/points/{pointId}', [MapPointsController::clas
 // POST /thematic-maps/{id}/points/{pointId}/image (Upload Gambar Titik)
 Route::post('/thematic-maps/{id}/points/{pointId}/image', [MapPointsController::class, 'uploadMapPointImage']);
 
+#Village Modules
+// GET /villages/{id}/modules (Get Modul Desa)
+Route::get('/villages/{id}/modules', [VillageModuleController::class, 'getModules']);
+
+// PUT /villages/{id}/modules/{name}/toggle (Toggle Modul)
+Route::put('/villages/{id}/modules/{name}/toggle', [VillageModuleController::class, 'toggleModule']);
 
