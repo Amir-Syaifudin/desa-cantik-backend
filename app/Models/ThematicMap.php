@@ -24,4 +24,9 @@ class ThematicMap extends Model
     {
         return $this->belongsTo(Village::class);
     }
+
+    public function mapPoints()
+    {
+        return $this -> hasMany(MapPoint::class);
+    }
 }

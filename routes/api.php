@@ -68,3 +68,18 @@ Route::put('/villages/{id}/thematic-maps/{mapId}', [ThematicMapsController::clas
 
 // DELETE /villages/{id}/thematic-maps/{id} (Delete Tema)
 Route::delete('/villages/{id}/thematic-maps/{mapId}', [ThematicMapsController::class, 'deleteThematicMap']);
+
+#Map Points
+// POST /thematic-maps/{id}/points (Create Titik Peta)
+Route::post('/thematic-maps/{id}/points', [MapPointsController::class, 'createMapPoint']);
+
+// PUT /thematic-maps/{id}/points/{pointId} (Update Titik)
+Route::put('/thematic-maps/{id}/points/{pointId}', [MapPointsController::class, 'updateMapPoint']);
+
+// DELETE /thematic-maps/{id}/points/{pointId} (Delete Titik)
+Route::delete('/thematic-maps/{id}/points/{pointId}', [MapPointsController::class, 'deleteMapPoint']);
+
+// POST /thematic-maps/{id}/points/{pointId}/image (Upload Gambar Titik)
+Route::post('/thematic-maps/{id}/points/{pointId}/image', [MapPointsController::class, 'uploadMapPointImage']);
+
+
