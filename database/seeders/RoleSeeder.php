@@ -11,21 +11,21 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             [
-                'role_name' => 'admin_bps',
-                'display_name' => 'Admin BPS',
+                'role_name' => 'bps_admin',
+                'display_name' => 'BPS Admin',
                 'description' => 'Administrator dari BPS yang mengelola seluruh sistem',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'role_name' => 'perangkat_desa',
+                'role_name' => 'village_officer',
                 'display_name' => 'Perangkat Desa',
                 'description' => 'Perangkat desa yang mengelola data desa masing-masing',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'role_name' => 'masyarakat',
+                'role_name' => 'guest',
                 'display_name' => 'Masyarakat Umum',
                 'description' => 'Masyarakat umum yang dapat melihat data publik',
                 'created_at' => now(),
