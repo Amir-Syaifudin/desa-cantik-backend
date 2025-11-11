@@ -18,4 +18,9 @@ class Village extends Model
     {
         return $this->hasOne(Profile::class);
     }
+
+    public function geospatial_data()
+    {
+        return $this -> hasMany(GeospatialData::class);
+    }
 }
