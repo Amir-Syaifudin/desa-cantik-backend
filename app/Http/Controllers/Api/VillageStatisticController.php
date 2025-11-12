@@ -16,6 +16,7 @@ use App\Services\ActivityLogger;
 use App\Services\VillageStatisticService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -288,12 +289,23 @@ class VillageStatisticController extends Controller
         ]);
     }
 
-    public function export(Request $request, Village $village): BinaryFileResponse
+    public function export(Request $request, Village $village): BinaryFileResponse|JsonResponse
     {
         $year = $request->query('year');
         $format = $request->query('format', 'csv');
 
-        return $this->service->export($village, $format, $year ? (int) $year : null);
+        try {
+            return $this->service->export($village, $format, $year ? (int) $year : null);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $message = Arr::first(Arr::flatten($e->errors())) ?? $e->getMessage();
+
+            return response()->json([
+                'success' => false,
+                'error' => 'VALIDATION_ERROR',
+                'message' => $message,
+                'errors' => $e->errors(),
+            ], $e->status ?? 422);
+        }
     }
 
     protected function user(): User
