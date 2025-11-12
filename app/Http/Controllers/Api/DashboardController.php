@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\DashboardAccessDeniedException;
+use App\Exceptions\InvalidDashboardRequestException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\VillageDashboardRequest;
 use App\Models\UserRole;
 use App\Services\DashboardStatisticsService;
 use Illuminate\Http\JsonResponse;
@@ -10,10 +13,13 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function __construct(private DashboardStatisticsService $service)
-    {
-    }
+    public function __construct(private DashboardStatisticsService $service) {}
 
+    /**
+     * Get BPS Admin Dashboard Statistics
+     * 
+     * @throws DashboardAccessDeniedException
+     */
     public function admin(Request $request): JsonResponse
     {
         $this->authorizeRole(UserRole::BPS_ADMIN);
@@ -24,25 +30,30 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function village(Request $request): JsonResponse
+    /**
+     * Get Village Officer Dashboard Statistics
+     * 
+     * @throws DashboardAccessDeniedException
+     * @throws InvalidDashboardRequestException
+     */
+    public function village(VillageDashboardRequest $request): JsonResponse
     {
         $user = $request->user();
 
         if (! $user) {
-            abort(401);
+            throw new DashboardAccessDeniedException('You must be authenticated to access the village dashboard');
         }
 
-        $villageId = $request->query('village_id');
-
-        if ($user->role?->role_name !== UserRole::BPS_ADMIN) {
-            $villageId = $user->desa_id;
-        }
+        $villageId = $request->getVillageId();
 
         if (! $villageId) {
-            abort(422, 'village_id is required');
+            throw new InvalidDashboardRequestException(
+                'Village ID is required. Village officers can only view their assigned village, ' .
+                    'while BPS administrators must specify a village_id parameter.'
+            );
         }
 
-        $data = $this->service->getVillageDashboard($user, (int) $villageId);
+        $data = $this->service->getVillageDashboard($user, $villageId);
 
         return response()->json([
             'success' => true,
@@ -50,6 +61,9 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Get Public Dashboard Statistics (Landing Page)
+     */
     public function public(): JsonResponse
     {
         return response()->json([
@@ -58,12 +72,27 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Authorize user has one of the specified roles
+     * 
+     * @throws DashboardAccessDeniedException
+     */
     protected function authorizeRole(string ...$roles): void
     {
         $user = auth()->user();
 
-        if (! $user || ! in_array($user->role?->role_name, $roles, true)) {
-            abort(403, 'Forbidden');
+        if (! $user) {
+            throw new DashboardAccessDeniedException('You must be authenticated to access this dashboard');
+        }
+
+        if (! in_array($user->role?->role_name, $roles, true)) {
+            throw new DashboardAccessDeniedException(
+                sprintf(
+                    'Access denied. Required role: %s. Your role: %s',
+                    implode(' or ', $roles),
+                    $user->role?->role_name ?? 'none'
+                )
+            );
         }
     }
 }

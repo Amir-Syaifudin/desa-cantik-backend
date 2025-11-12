@@ -135,8 +135,13 @@ class DashboardStatisticsService
         $statisticModel = addslashes(VillageStatistic::class);
         $publicationModel = addslashes(Publication::class);
 
+        // Use database-agnostic date formatting
+        $dateFormat = DB::connection()->getDriverName() === 'sqlite'
+            ? "strftime('%Y-%m', created_at)"
+            : "DATE_FORMAT(created_at, '%Y-%m')";
+
         $rows = ActivityLog::query()
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month")
+            ->selectRaw("{$dateFormat} as month")
             ->selectRaw("SUM(CASE WHEN model_type = '{$statisticModel}' AND action = 'create' THEN 1 ELSE 0 END) as statistics_created")
             ->selectRaw("SUM(CASE WHEN model_type = '{$statisticModel}' AND action = 'update' THEN 1 ELSE 0 END) as statistics_updated")
             ->selectRaw("SUM(CASE WHEN model_type = '{$publicationModel}' AND action = 'create' THEN 1 ELSE 0 END) as publications_uploaded")

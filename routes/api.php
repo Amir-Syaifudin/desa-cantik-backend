@@ -30,8 +30,12 @@ Route::prefix('v1')->group(function () {
         ->name('publications.download');
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('dashboard/admin', [DashboardController::class, 'admin']);
-        Route::get('dashboard/village', [DashboardController::class, 'village']);
+        // Dashboard endpoints with explicit role middleware
+        Route::get('dashboard/admin', [DashboardController::class, 'admin'])
+            ->middleware('role:bps_admin');
+
+        Route::get('dashboard/village', [DashboardController::class, 'village'])
+            ->middleware('role:bps_admin,village_officer');
 
         Route::post('villages/{village}/statistics', [VillageStatisticController::class, 'store']);
         Route::put('villages/{village}/statistics/{statistic}', [VillageStatisticController::class, 'update']);

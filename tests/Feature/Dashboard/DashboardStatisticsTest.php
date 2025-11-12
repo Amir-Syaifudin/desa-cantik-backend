@@ -55,8 +55,24 @@ class DashboardStatisticsTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.summary.total_villages', 1)
-            ->assertJsonPath('data.summary.total_statistics', 1)
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'summary' => [
+                        'total_villages',
+                        'active_villages',
+                        'inactive_villages',
+                        'total_users',
+                        'active_users',
+                        'total_statistics',
+                        'total_publications',
+                        'total_thematic_maps',
+                    ],
+                    'recent_activities',
+                    'villages_statistics',
+                    'monthly_activities',
+                ],
+            ])
             ->assertJsonPath('data.recent_activities.0.action', 'create');
     }
 
@@ -115,7 +131,86 @@ class DashboardStatisticsTest extends TestCase
         $response = $this->getJson('/api/v1/dashboard/public');
 
         $response->assertOk()
-            ->assertJsonPath('data.summary.total_villages', 1);
+            ->assertJsonPath('success', true)
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'summary' => [
+                        'total_villages',
+                        'total_statistics',
+                        'total_publications',
+                    ],
+                    'featured_villages',
+                    'latest_publications',
+                    'statistics_overview',
+                ],
+            ]);
+    }
+
+    public function test_unauthenticated_user_cannot_access_admin_dashboard(): void
+    {
+        $this->getJson('/api/v1/dashboard/admin')
+            ->assertStatus(401);
+    }
+
+    public function test_admin_can_view_specific_village_dashboard(): void
+    {
+        $adminRole = UserRole::where('role_name', UserRole::BPS_ADMIN)->first();
+        $admin = User::factory()
+            ->for($adminRole, 'role')
+            ->withoutVillage()
+            ->create();
+
+        $village = Village::factory()->create();
+        VillageProfile::factory()->for($village, 'village')->create();
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->getJson('/api/v1/dashboard/village?village_id=' . $village->id);
+
+        $response->assertOk()
+            ->assertJsonPath('data.village.id', $village->id);
+    }
+
+    public function test_admin_cannot_view_village_dashboard_with_invalid_village_id(): void
+    {
+        $adminRole = UserRole::where('role_name', UserRole::BPS_ADMIN)->first();
+        $admin = User::factory()
+            ->for($adminRole, 'role')
+            ->withoutVillage()
+            ->create();
+
+        $this->actingAs($admin, 'sanctum')
+            ->getJson('/api/v1/dashboard/village?village_id=99999')
+            ->assertStatus(422);
+    }
+
+    public function test_village_officer_cannot_view_other_village_dashboard(): void
+    {
+        $officerRole = UserRole::where('role_name', UserRole::VILLAGE_OFFICER)->first();
+        $officer = User::factory()->for($officerRole, 'role')->create();
+
+        $otherVillage = Village::factory()->create();
+
+        // Officer tries to access other village - should still get their own village
+        $response = $this->actingAs($officer, 'sanctum')
+            ->getJson('/api/v1/dashboard/village?village_id=' . $otherVillage->id);
+
+        $response->assertOk()
+            ->assertJsonPath('data.village.id', $officer->desa_id);
+    }
+
+    public function test_dashboard_returns_proper_error_for_missing_village_id(): void
+    {
+        $adminRole = UserRole::where('role_name', UserRole::BPS_ADMIN)->first();
+        $admin = User::factory()
+            ->for($adminRole, 'role')
+            ->withoutVillage()
+            ->create();
+
+        $this->actingAs($admin, 'sanctum')
+            ->getJson('/api/v1/dashboard/village')
+            ->assertStatus(422)
+            ->assertJsonPath('error', 'INVALID_DASHBOARD_REQUEST');
     }
 
     protected function seedBaseRoles(): void
