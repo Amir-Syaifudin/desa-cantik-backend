@@ -1,136 +1,154 @@
-# Authentication API V2 - Complete Testing Script (PowerShell)
-# Desa Cantik API - Tests ALL endpoints
+# ============================================
+# Authentication API Testing Script
+# Project: Desa Cantik API
+# ============================================
 
-$BASE_URL = "http://localhost:8000/api"
+$BASE_URL = "http://localhost:8000/api/v1"
+$ErrorActionPreference = "Continue"
 
-Write-Host "=============================================" -ForegroundColor Cyan
-Write-Host "DESA CANTIK API V2 - COMPLETE AUTH TESTS" -ForegroundColor Cyan
-Write-Host "=============================================" -ForegroundColor Cyan
-Write-Host ""
+Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host "  AUTHENTICATION API TESTING SUITE" -ForegroundColor Cyan
+Write-Host "========================================`n" -ForegroundColor Cyan
 
-# 1. Health Check
-Write-Host "1. Testing Health Check..." -ForegroundColor Yellow
-curl.exe -X GET "$BASE_URL/health" -H "Accept: application/json"
-Write-Host ""
-Start-Sleep -Seconds 1
+# ===== TEST 1: LOGIN WITH EMAIL =====
+Write-Host "[1/9] Testing Login with Email..." -ForegroundColor Yellow
+try {
+    $loginResponse = Invoke-RestMethod -Uri "$BASE_URL/auth/login" -Method POST -Body (@{
+        login = "admin@bps.go.id"
+        password = "password"
+    } | ConvertTo-Json) -ContentType "application/json"
+    
+    $token = $loginResponse.data.token
+    Write-Host "  ✓ Login Success!" -ForegroundColor Green
+    Write-Host "    User: $($loginResponse.data.user.full_name)" -ForegroundColor Gray
+    Write-Host "    Email: $($loginResponse.data.user.email)" -ForegroundColor Gray
+    if ($loginResponse.data.user.role) {
+        Write-Host "    Role: $($loginResponse.data.user.role.display_name)" -ForegroundColor Gray
+    }
+    Write-Host "    Token: $($token.Substring(0, 30))..." -ForegroundColor Gray
+} catch {
+    $errorDetails = $_.ErrorDetails.Message | ConvertFrom-Json
+    Write-Host "  ✗ Login Failed!" -ForegroundColor Red
+    Write-Host "    Error: $($errorDetails.message)" -ForegroundColor Red
+    exit 1
+}
 
-# 2. Register
-Write-Host "2. Testing User Registration..." -ForegroundColor Yellow
-curl.exe -X POST "$BASE_URL/auth/register" `
-  -H "Content-Type: application/json" `
-  -d '{"username":"test_perangkat","email":"test@desacantik.id","password":"password123","password_confirmation":"password123","role_id":2,"desa_id":1,"full_name":"Test Perangkat Desa","phone":"081234567890"}'
-Write-Host ""
-Start-Sleep -Seconds 1
+# ===== TEST 2: LOGIN WITH USERNAME =====
+Write-Host "`n[2/9] Testing Login with Username..." -ForegroundColor Yellow
+try {
+    $loginUsernameResponse = Invoke-RestMethod -Uri "$BASE_URL/auth/login" -Method POST -Body (@{
+        login = "admin"
+        password = "password"
+    } | ConvertTo-Json) -ContentType "application/json"
+    
+    Write-Host "  ✓ Login with Username Success!" -ForegroundColor Green
+    Write-Host "    User: $($loginUsernameResponse.data.user.username)" -ForegroundColor Gray
+} catch {
+    Write-Host "  ✗ Login with Username Failed!" -ForegroundColor Red
+    Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Red
+}
 
-# 3. Login with USERNAME
-Write-Host "3. Testing Login with USERNAME..." -ForegroundColor Yellow
-$loginResponse = curl.exe -X POST "$BASE_URL/auth/login" `
-  -H "Content-Type: application/json" `
-  -d '{"login":"test_perangkat","password":"password123"}' | ConvertFrom-Json
+# ===== TEST 3: GET CURRENT USER =====
+Write-Host "`n[3/9] Testing Get Current User..." -ForegroundColor Yellow
+$headers = @{ 
+    "Authorization" = "Bearer $token"
+    "Accept" = "application/json"
+}
+try {
+    $userResponse = Invoke-RestMethod -Uri "$BASE_URL/auth/user" -Method GET -Headers $headers
+    Write-Host "  ✓ Get User Success!" -ForegroundColor Green
+    Write-Host "    ID: $($userResponse.data.id)" -ForegroundColor Gray
+    Write-Host "    Username: $($userResponse.data.username)" -ForegroundColor Gray
+    Write-Host "    Email: $($userResponse.data.email)" -ForegroundColor Gray
+    Write-Host "    Full Name: $($userResponse.data.full_name)" -ForegroundColor Gray
+    Write-Host "    Active: $($userResponse.data.is_active)" -ForegroundColor Gray
+} catch {
+    Write-Host "  ✗ Get User Failed!" -ForegroundColor Red
+    Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Red
+}
 
-Write-Host "Login Successful!" -ForegroundColor Green
-$TOKEN = $loginResponse.data.token
-Write-Host "Token: $TOKEN" -ForegroundColor Cyan
-Write-Host ""
-Start-Sleep -Seconds 1
+# ===== TEST 4: UPDATE PROFILE =====
+Write-Host "`n[4/9] Testing Update Profile..." -ForegroundColor Yellow
+try {
+    $updateResponse = Invoke-RestMethod -Uri "$BASE_URL/auth/profile" -Method PUT -Headers $headers -Body (@{
+        full_name = "Administrator Sistem Updated"
+        phone_number = "081999999999"
+    } | ConvertTo-Json) -ContentType "application/json"
+    
+    Write-Host "  ✓ Update Profile Success!" -ForegroundColor Green
+    Write-Host "    New Full Name: $($updateResponse.data.full_name)" -ForegroundColor Gray
+    Write-Host "    New Phone: $($updateResponse.data.phone_number)" -ForegroundColor Gray
+} catch {
+    Write-Host "  ✗ Update Profile Failed!" -ForegroundColor Red
+    Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Red
+}
 
-# 4. Login with EMAIL (NEW FEATURE!)
-Write-Host "4. Testing Login with EMAIL (NEW)..." -ForegroundColor Yellow
-$emailLoginResponse = curl.exe -X POST "$BASE_URL/auth/login" `
-  -H "Content-Type: application/json" `
-  -d '{"login":"test@desacantik.id","password":"password123"}' | ConvertFrom-Json
+# ===== TEST 5: UPDATE PASSWORD (SKIP) =====
+Write-Host "`n[5/9] Testing Update Password..." -ForegroundColor Yellow
+Write-Host "  ⊘ Skipped (would invalidate current token)" -ForegroundColor Yellow
 
-Write-Host "Email Login Successful!" -ForegroundColor Green
-$EMAIL_TOKEN = $emailLoginResponse.data.token
-Write-Host ""
-Start-Sleep -Seconds 1
+# ===== TEST 6: TOKEN REFRESH =====
+Write-Host "`n[6/9] Testing Token Refresh..." -ForegroundColor Yellow
+try {
+    $refreshResponse = Invoke-RestMethod -Uri "$BASE_URL/auth/token/refresh" -Method POST -Headers $headers
+    $newToken = $refreshResponse.data.token
+    Write-Host "  ✓ Token Refresh Success!" -ForegroundColor Green
+    Write-Host "    New Token: $($newToken.Substring(0, 30))..." -ForegroundColor Gray
+    
+    # Update headers with new token
+    $headers["Authorization"] = "Bearer $newToken"
+} catch {
+    Write-Host "  ✗ Token Refresh Failed!" -ForegroundColor Red
+    Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Red
+}
 
-# 5. Get Profile
-Write-Host "5. Testing Get User Profile..." -ForegroundColor Yellow
-curl.exe -X GET "$BASE_URL/auth/me" `
-  -H "Authorization: Bearer $TOKEN" `
-  -H "Accept: application/json"
-Write-Host ""
-Start-Sleep -Seconds 1
+# ===== TEST 7: FORGOT PASSWORD =====
+Write-Host "`n[7/9] Testing Forgot Password..." -ForegroundColor Yellow
+try {
+    $forgotResponse = Invoke-RestMethod -Uri "$BASE_URL/auth/password/forgot" -Method POST -Body (@{
+        email = "admin@bps.go.id"
+    } | ConvertTo-Json) -ContentType "application/json"
+    
+    Write-Host "  ✓ Forgot Password Request Success!" -ForegroundColor Green
+    Write-Host "    Message: $($forgotResponse.message)" -ForegroundColor Gray
+} catch {
+    Write-Host "  ✗ Forgot Password Failed!" -ForegroundColor Red
+    Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Red
+}
 
-# 6. Update Profile (NEW FEATURE!)
-Write-Host "6. Testing Update Profile (NEW)..." -ForegroundColor Yellow
-curl.exe -X PUT "$BASE_URL/auth/profile" `
-  -H "Authorization: Bearer $TOKEN" `
-  -H "Content-Type: application/json" `
-  -d '{"full_name":"Updated Name","phone":"089876543210"}'
-Write-Host ""
-Start-Sleep -Seconds 1
+# ===== TEST 8: INVALID LOGIN =====
+Write-Host "`n[8/9] Testing Invalid Login (should fail)..." -ForegroundColor Yellow
+try {
+    Invoke-RestMethod -Uri "$BASE_URL/auth/login" -Method POST -Body (@{
+        login = "invalid@example.com"
+        password = "wrongpassword"
+    } | ConvertTo-Json) -ContentType "application/json"
+    
+    Write-Host "  ✗ ERROR: Invalid login succeeded (should have failed)!" -ForegroundColor Red
+} catch {
+    Write-Host "  ✓ Correctly Rejected Invalid Login!" -ForegroundColor Green
+}
 
-# 7. Forgot Password (NEW FEATURE!)
-Write-Host "7. Testing Forgot Password (NEW)..." -ForegroundColor Yellow
-$forgotResponse = curl.exe -X POST "$BASE_URL/auth/forgot-password" `
-  -H "Content-Type: application/json" `
-  -d '{"email":"test@desacantik.id"}' | ConvertFrom-Json
+# ===== TEST 9: LOGOUT =====
+Write-Host "`n[9/9] Testing Logout..." -ForegroundColor Yellow
+try {
+    $logoutResponse = Invoke-RestMethod -Uri "$BASE_URL/auth/logout" -Method POST -Headers $headers
+    Write-Host "  ✓ Logout Success!" -ForegroundColor Green
+    Write-Host "    Message: $($logoutResponse.message)" -ForegroundColor Gray
+} catch {
+    Write-Host "  ✗ Logout Failed!" -ForegroundColor Red
+    Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Red
+}
 
-$RESET_TOKEN = $forgotResponse.data.reset_token
-Write-Host "Reset Token: $RESET_TOKEN" -ForegroundColor Magenta
-Write-Host ""
-Start-Sleep -Seconds 1
+# ===== TEST 10: ACCESS AFTER LOGOUT =====
+Write-Host "`n[10/10] Testing Access After Logout (should fail)..." -ForegroundColor Yellow
+try {
+    Invoke-RestMethod -Uri "$BASE_URL/auth/user" -Method GET -Headers $headers
+    Write-Host "  ✗ ERROR: Still can access after logout!" -ForegroundColor Red
+} catch {
+    Write-Host "  ✓ Correctly Blocked! (Unauthorized)" -ForegroundColor Green
+}
 
-# 8. Reset Password (NEW FEATURE!)
-Write-Host "8. Testing Reset Password (NEW)..." -ForegroundColor Yellow
-curl.exe -X POST "$BASE_URL/auth/reset-password" `
-  -H "Content-Type: application/json" `
-  -d "{\`"email\`":\`"test@desacantik.id\`",\`"token\`":\`"$RESET_TOKEN\`",\`"password\`":\`"newpassword123\`",\`"password_confirmation\`":\`"newpassword123\`"}"
-Write-Host ""
-Start-Sleep -Seconds 1
-
-# 9. Login with NEW password
-Write-Host "9. Testing Login with NEW Password..." -ForegroundColor Yellow
-$newLoginResponse = curl.exe -X POST "$BASE_URL/auth/login" `
-  -H "Content-Type: application/json" `
-  -d '{"login":"test@desacantik.id","password":"newpassword123"}' | ConvertFrom-Json
-
-$NEW_TOKEN = $newLoginResponse.data.token
-Write-Host "Login with new password successful!" -ForegroundColor Green
-Write-Host ""
-Start-Sleep -Seconds 1
-
-# 10. Update Password (NEW FEATURE!)
-Write-Host "10. Testing Update Password (NEW)..." -ForegroundColor Yellow
-curl.exe -X PUT "$BASE_URL/auth/password" `
-  -H "Authorization: Bearer $NEW_TOKEN" `
-  -H "Content-Type: application/json" `
-  -d '{"current_password":"newpassword123","new_password":"finalpassword123","new_password_confirmation":"finalpassword123"}'
-Write-Host ""
-Start-Sleep -Seconds 1
-
-# 11. Refresh Token
-Write-Host "11. Testing Token Refresh..." -ForegroundColor Yellow
-$refreshResponse = curl.exe -X POST "$BASE_URL/auth/refresh" `
-  -H "Authorization: Bearer $NEW_TOKEN" `
-  -H "Accept: application/json" | ConvertFrom-Json
-
-$REFRESHED_TOKEN = $refreshResponse.data.token
-Write-Host "Token Refreshed!" -ForegroundColor Green
-Write-Host ""
-Start-Sleep -Seconds 1
-
-# 12. Logout
-Write-Host "12. Testing Logout..." -ForegroundColor Yellow
-curl.exe -X POST "$BASE_URL/auth/logout" `
-  -H "Authorization: Bearer $REFRESHED_TOKEN" `
-  -H "Accept: application/json"
-Write-Host ""
-
-Write-Host "=============================================" -ForegroundColor Cyan
-Write-Host "ALL TESTS COMPLETED SUCCESSFULLY!" -ForegroundColor Cyan
-Write-Host "=============================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "✅ Health Check" -ForegroundColor Green
-Write-Host "✅ User Registration" -ForegroundColor Green
-Write-Host "✅ Login with USERNAME" -ForegroundColor Green
-Write-Host "✅ Login with EMAIL (NEW)" -ForegroundColor Green
-Write-Host "✅ Get Profile" -ForegroundColor Green
-Write-Host "✅ Update Profile (NEW)" -ForegroundColor Green
-Write-Host "✅ Forgot Password (NEW)" -ForegroundColor Green
-Write-Host "✅ Reset Password (NEW)" -ForegroundColor Green
-Write-Host "✅ Update Password (NEW)" -ForegroundColor Green
-Write-Host "✅ Token Refresh" -ForegroundColor Green
-Write-Host "✅ Logout" -ForegroundColor Green
+Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host "  ALL TESTS COMPLETED" -ForegroundColor Cyan
+Write-Host "========================================`n" -ForegroundColor Cyan

@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
+use App\Models\Village;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
-class DesaSeeder extends Seeder
+class VillageSeeder extends Seeder
 {
     public function run(): void
     {
-        $desa = [
+        $villages = [
             [
-                'kode_desa' => '7316010001',
-                'nama_desa' => 'Nonongan Selatan',
+                'village_code' => '7316010001',
+                'name' => 'Nonongan Selatan',
                 'kecamatan' => 'Rantepao',
                 'kabupaten' => 'Toraja Utara',
                 'provinsi' => 'Sulawesi Selatan',
@@ -21,8 +21,8 @@ class DesaSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'kode_desa' => '7316010002',
-                'nama_desa' => 'Rindingbatu',
+                'village_code' => '7316010002',
+                'name' => 'Rindingbatu',
                 'kecamatan' => 'Rantepao',
                 'kabupaten' => 'Toraja Utara',
                 'provinsi' => 'Sulawesi Selatan',
@@ -32,7 +32,13 @@ class DesaSeeder extends Seeder
             ],
         ];
 
-        DB::table('desa')->insert($desa);
-        $this->command->info('✅ 2 desa created');
+        foreach ($villages as $village) {
+            Village::updateOrCreate(
+                ['village_code' => $village['village_code']],
+                $village
+            );
+        }
+
+        $this->command->info('✓ Villages seeded successfully');
     }
 }
