@@ -336,7 +336,7 @@ class AuthController extends Controller
             $token = Str::random(64);
 
             // Store in database (create password_resets table)
-            \DB::table('password_resets')->updateOrInsert(
+            \DB::table('password_reset_tokens')->updateOrInsert(
                 ['email' => $request->email],
                 [
                     'token' => Hash::make($token),
@@ -389,7 +389,7 @@ class AuthController extends Controller
             }
 
             // Verify token
-            $passwordReset = \DB::table('password_resets')
+                $passwordReset = DB::table('password_reset_tokens')
                 ->where('email', $request->email)
                 ->first();
 
@@ -415,7 +415,7 @@ class AuthController extends Controller
             ]);
 
             // Delete reset token
-            \DB::table('password_resets')->where('email', $request->email)->delete();
+            \DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
             // Revoke all tokens
             $user->tokens()->delete();
