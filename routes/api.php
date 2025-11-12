@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PublicationController;
 use App\Http\Controllers\Api\StatisticTypeController;
 use App\Http\Controllers\Api\VillageStatisticController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\VillageModuleController;
 
 Route::prefix('v1')->group(function () {
     Route::get('statistic-types', [StatisticTypeController::class, 'index']);
+    Route::get('dashboard/public', [DashboardController::class, 'public']);
 
     Route::get('villages/{village}/statistics', [VillageStatisticController::class, 'index']);
     Route::get('villages/{village}/statistics/summary', [VillageStatisticController::class, 'summary']);
@@ -28,6 +30,9 @@ Route::prefix('v1')->group(function () {
         ->name('publications.download');
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('dashboard/admin', [DashboardController::class, 'admin']);
+        Route::get('dashboard/village', [DashboardController::class, 'village']);
+
         Route::post('villages/{village}/statistics', [VillageStatisticController::class, 'store']);
         Route::put('villages/{village}/statistics/{statistic}', [VillageStatisticController::class, 'update']);
         Route::delete('villages/{village}/statistics/{statistic}', [VillageStatisticController::class, 'destroy']);

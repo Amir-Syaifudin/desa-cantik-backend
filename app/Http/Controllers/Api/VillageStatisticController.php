@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Village;
 use App\Models\VillageStatistic;
+use App\Services\ActivityLogger;
 use App\Services\VillageStatisticService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -201,6 +202,13 @@ class VillageStatisticController extends Controller
             'creator:id,full_name,name'
         ]);
 
+        ActivityLogger::log(
+            'create',
+            $statistic,
+            sprintf('Menambahkan data statistik %s', $statistic->indicator_name),
+            ['new_data' => $statistic->toArray()]
+        );
+
         return response()->json([
             'success' => true,
             'message' => 'Data statistik berhasil ditambahkan',
@@ -216,6 +224,7 @@ class VillageStatisticController extends Controller
         $statistic = $this->findStatisticOrFail($village, $statistic);
 
         $data = $request->validated();
+        $original = $statistic->toArray();
         $statistic->fill($data);
         $statistic->updated_by = $user->id;
         $statistic->save();
@@ -224,6 +233,16 @@ class VillageStatisticController extends Controller
             'creator:id,full_name,name',
             'updater:id,full_name,name'
         ]);
+
+        ActivityLogger::log(
+            'update',
+            $statistic,
+            sprintf('Memperbarui data statistik %s', $statistic->indicator_name),
+            [
+                'old_data' => $original,
+                'new_data' => $statistic->toArray(),
+            ]
+        );
 
         return response()->json([
             'success' => true,
@@ -238,6 +257,15 @@ class VillageStatisticController extends Controller
         $this->authorizeVillageAccess($village, $user);
 
         $statistic = $this->findStatisticOrFail($village, $statistic);
+        $snapshot = $statistic->toArray();
+
+        ActivityLogger::log(
+            'delete',
+            $statistic,
+            sprintf('Menghapus data statistik %s', $statistic->indicator_name),
+            ['old_data' => $snapshot]
+        );
+
         $statistic->delete();
 
         return response()->json([
