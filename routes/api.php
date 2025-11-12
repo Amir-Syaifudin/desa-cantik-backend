@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\PublicationController;
 use App\Http\Controllers\Api\StatisticTypeController;
 use App\Http\Controllers\Api\VillageStatisticController;
+use App\Http\Controllers\MapPointsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VillageController;
@@ -20,6 +22,11 @@ Route::prefix('v1')->group(function () {
     Route::get('villages/{village}/statistics/export', [VillageStatisticController::class, 'export'])
         ->middleware('throttle:exports');
 
+    Route::get('villages/{village}/publications', [PublicationController::class, 'index']);
+    Route::get('publications/{publication}', [PublicationController::class, 'show']);
+    Route::get('publications/{publication}/download', [PublicationController::class, 'download'])
+        ->name('publications.download');
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('villages/{village}/statistics', [VillageStatisticController::class, 'store']);
         Route::put('villages/{village}/statistics/{statistic}', [VillageStatisticController::class, 'update']);
@@ -28,13 +35,17 @@ Route::prefix('v1')->group(function () {
         // Import with rate limiting for resource-intensive operations
         Route::post('villages/{village}/statistics/import', [VillageStatisticController::class, 'import'])
             ->middleware('throttle:imports');
+
+        Route::post('villages/{village}/publications', [PublicationController::class, 'store']);
+        Route::put('villages/{village}/publications/{publication}', [PublicationController::class, 'update']);
+        Route::post('villages/{village}/publications/{publication}/replace-file', [PublicationController::class, 'replaceFile']);
+        Route::delete('villages/{village}/publications/{publication}', [PublicationController::class, 'destroy']);
     });
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
-<<<<<<< HEAD
-})->middleware('auth:sanctum');
+});
 
 #Village Management
 // GET /villages (Get All)
@@ -113,7 +124,3 @@ Route::get('/villages/{id}/modules', [VillageModuleController::class, 'getModule
 
 // PUT /villages/{id}/modules/{name}/toggle (Toggle Modul)
 Route::put('/villages/{id}/modules/{name}/toggle', [VillageModuleController::class, 'toggleModule']);
-
-=======
-});
->>>>>>> 94385f3cdb1d2dcc1ae7fe7b9eb0ba34133a217f
