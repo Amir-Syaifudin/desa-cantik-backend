@@ -34,7 +34,7 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'role_id' => UserRole::factory(),
-            'desa_id' => Village::factory(),
+            'village_id' => Village::factory(),
             'is_active' => true,
         ];
     }
@@ -44,22 +44,22 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }
 
     public function inactive(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn() => [
             'is_active' => false,
         ]);
     }
 
     public function withoutVillage(): static
     {
-        return $this->state(fn () => [
-            'desa_id' => null,
+        return $this->state(fn() => [
+            'village_id' => null,
         ]);
     }
 }

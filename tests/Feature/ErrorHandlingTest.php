@@ -215,7 +215,7 @@ class ErrorHandlingTest extends TestCase
     /** @test */
     public function it_handles_export_with_no_data(): void
     {
-        $village = Village::factory()->create(['nama_desa' => 'TestVillage']);
+        $village = Village::factory()->create(['name' => 'TestVillage']);
 
         $response = $this->get("/api/v1/villages/{$village->id}/statistics/export?format=csv");
 

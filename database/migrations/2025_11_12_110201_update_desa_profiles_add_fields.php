@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('desa_profiles', function (Blueprint $table) {
+        Schema::table('village_profiles', function (Blueprint $table) {
             $table->decimal('area', 10, 2)->nullable()->after('misi');
             $table->unsignedBigInteger('population')->nullable()->after('area');
             $table->decimal('population_density', 10, 2)->nullable()->after('population');
@@ -24,7 +24,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('desa_profiles', function (Blueprint $table) {
+        Schema::table('village_profiles', function (Blueprint $table) {
             $table->dropColumn([
                 'area',
                 'population',

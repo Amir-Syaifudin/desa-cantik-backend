@@ -17,8 +17,8 @@ class VillageFactory extends Factory
     public function definition(): array
     {
         return [
-            'kode_desa' => fake()->unique()->numerify('7316#######'),
-            'nama_desa' => fake()->city(),
+            'village_code' => fake()->unique()->numerify('7316#######'),
+            'name' => fake()->city(),
             'kecamatan' => fake()->citySuffix(),
             'kabupaten' => 'Toraja Utara',
             'provinsi' => 'Sulawesi Selatan',

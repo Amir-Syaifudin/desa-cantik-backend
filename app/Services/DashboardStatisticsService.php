@@ -29,7 +29,7 @@ class DashboardStatisticsService
 
     public function getVillageDashboard(User $user, ?int $villageId = null): array
     {
-        $targetVillageId = $villageId ?? $user->desa_id;
+        $targetVillageId = $villageId ?? $user->village_id;
 
         if (! $targetVillageId) {
             throw new RuntimeException('Village context is required.');
@@ -44,8 +44,8 @@ class DashboardStatisticsService
             return [
                 'village' => [
                     'id' => $village->id,
-                    'name' => $village->nama_desa,
-                    'code' => $village->kode_desa,
+                    'name' => $village->name,
+                    'code' => $village->village_code,
                 ],
                 'summary' => $this->villageSummary($village),
                 'recent_activities' => $this->recentActivities($village->id),
@@ -106,7 +106,7 @@ class DashboardStatisticsService
     protected function villageStatisticsOverview(): array
     {
         $villages = Village::query()
-            ->select(['id', 'nama_desa'])
+            ->select(['id', 'name'])
             ->withCount(['statistics', 'publications'])
             ->withMax('statistics', 'updated_at')
             ->orderByDesc('statistics_count')
@@ -122,7 +122,7 @@ class DashboardStatisticsService
                 ->max();
 
             return [
-                'village_name' => $village->nama_desa,
+                'village_name' => $village->name,
                 'statistics_count' => $village->statistics_count,
                 'publications_count' => $village->publications_count,
                 'last_updated' => $lastUpdated?->toISOString(),
@@ -245,13 +245,13 @@ class DashboardStatisticsService
     {
         return VillageProfile::query()
             ->where('is_featured', true)
-            ->with('village:id,nama_desa,kecamatan')
+            ->with('village:id,name,kecamatan')
             ->limit(5)
             ->get()
             ->map(function (VillageProfile $profile) {
                 return [
                     'id' => $profile->village?->id,
-                    'name' => $profile->village?->nama_desa,
+                    'name' => $profile->village?->name,
                     'district' => $profile->village?->kecamatan,
                     'population' => $profile->population,
                     'thumbnail' => $profile->thumbnail_url ?? $profile->foto_url,
@@ -263,14 +263,14 @@ class DashboardStatisticsService
     protected function latestPublications(): array
     {
         return Publication::query()
-            ->with('village:id,nama_desa')
+            ->with('village:id,name')
             ->orderByDesc('published_at')
             ->limit(5)
             ->get()
             ->map(fn(Publication $publication) => [
                 'id' => $publication->id,
                 'title' => $publication->title,
-                'village_name' => $publication->village?->nama_desa,
+                'village_name' => $publication->village?->name,
                 'published_at' => optional($publication->published_at)->toDateString(),
                 'download_url' => $publication->download_url,
             ])

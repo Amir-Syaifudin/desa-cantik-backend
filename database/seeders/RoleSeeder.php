@@ -33,7 +33,7 @@ class RoleSeeder extends Seeder
             ],
         ];
 
-        DB::table('user_roles')->insert($roles);
+        DB::table('roles')->insert($roles);
         $this->command->info('✅ 3 roles created');
     }
 }
