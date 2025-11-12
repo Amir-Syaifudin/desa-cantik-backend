@@ -16,7 +16,7 @@ class VillageProfileFactory extends Factory
     public function definition(): array
     {
         return [
-            'desa_id' => \App\Models\Village::factory(),
+            'village_id' => \App\Models\Village::factory(),
             'deskripsi' => fake()->paragraph(),
             'sejarah' => fake()->paragraph(),
             'visi' => fake()->sentence(),
