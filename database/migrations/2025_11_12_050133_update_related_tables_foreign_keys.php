@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -15,45 +14,51 @@ return new class extends Migration
                     $table->dropForeign(['desa_id']);
                 }
             });
-            
-            DB::statement('ALTER TABLE desa_profiles CHANGE desa_id village_id BIGINT UNSIGNED NOT NULL');
-            
+
+            Schema::table('desa_profiles', function (Blueprint $table) {
+                $table->renameColumn('desa_id', 'village_id');
+            });
+
             Schema::table('desa_profiles', function (Blueprint $table) {
                 $table->foreign('village_id')->references('id')->on('villages')->onDelete('cascade');
             });
-            
+
             Schema::rename('desa_profiles', 'village_profiles');
         }
-        
+
         if (Schema::hasTable('desa_modules')) {
             Schema::table('desa_modules', function (Blueprint $table) {
                 if (Schema::hasColumn('desa_modules', 'desa_id')) {
                     $table->dropForeign(['desa_id']);
                 }
             });
-            
-            DB::statement('ALTER TABLE desa_modules CHANGE desa_id village_id BIGINT UNSIGNED NOT NULL');
-            
+
+            Schema::table('desa_modules', function (Blueprint $table) {
+                $table->renameColumn('desa_id', 'village_id');
+            });
+
             Schema::table('desa_modules', function (Blueprint $table) {
                 $table->foreign('village_id')->references('id')->on('villages')->onDelete('cascade');
             });
-            
+
             Schema::rename('desa_modules', 'village_modules');
         }
-        
+
         if (Schema::hasTable('desa_indicator_data')) {
             Schema::table('desa_indicator_data', function (Blueprint $table) {
                 if (Schema::hasColumn('desa_indicator_data', 'desa_id')) {
                     $table->dropForeign(['desa_id']);
                 }
             });
-            
-            DB::statement('ALTER TABLE desa_indicator_data CHANGE desa_id village_id BIGINT UNSIGNED NOT NULL');
-            
+
+            Schema::table('desa_indicator_data', function (Blueprint $table) {
+                $table->renameColumn('desa_id', 'village_id');
+            });
+
             Schema::table('desa_indicator_data', function (Blueprint $table) {
                 $table->foreign('village_id')->references('id')->on('villages')->onDelete('cascade');
             });
-            
+
             Schema::rename('desa_indicator_data', 'village_indicator_data');
         }
     }
@@ -65,29 +70,35 @@ return new class extends Migration
             Schema::table('desa_profiles', function (Blueprint $table) {
                 $table->dropForeign(['village_id']);
             });
-            DB::statement('ALTER TABLE desa_profiles CHANGE village_id desa_id BIGINT UNSIGNED NOT NULL');
+            Schema::table('desa_profiles', function (Blueprint $table) {
+                $table->renameColumn('village_id', 'desa_id');
+            });
             Schema::table('desa_profiles', function (Blueprint $table) {
                 $table->foreign('desa_id')->references('id')->on('desa')->onDelete('cascade');
             });
         }
-        
+
         if (Schema::hasTable('village_modules')) {
             Schema::rename('village_modules', 'desa_modules');
             Schema::table('desa_modules', function (Blueprint $table) {
                 $table->dropForeign(['village_id']);
             });
-            DB::statement('ALTER TABLE desa_modules CHANGE village_id desa_id BIGINT UNSIGNED NOT NULL');
+            Schema::table('desa_modules', function (Blueprint $table) {
+                $table->renameColumn('village_id', 'desa_id');
+            });
             Schema::table('desa_modules', function (Blueprint $table) {
                 $table->foreign('desa_id')->references('id')->on('desa')->onDelete('cascade');
             });
         }
-        
+
         if (Schema::hasTable('village_indicator_data')) {
             Schema::rename('village_indicator_data', 'desa_indicator_data');
             Schema::table('desa_indicator_data', function (Blueprint $table) {
                 $table->dropForeign(['village_id']);
             });
-            DB::statement('ALTER TABLE desa_indicator_data CHANGE village_id desa_id BIGINT UNSIGNED NOT NULL');
+            Schema::table('desa_indicator_data', function (Blueprint $table) {
+                $table->renameColumn('village_id', 'desa_id');
+            });
             Schema::table('desa_indicator_data', function (Blueprint $table) {
                 $table->foreign('desa_id')->references('id')->on('desa')->onDelete('cascade');
             });

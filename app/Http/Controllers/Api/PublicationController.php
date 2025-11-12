@@ -22,9 +22,7 @@ class PublicationController extends Controller
 {
     use AuthorizesVillageAccess;
 
-    public function __construct(private PublicationService $publicationService)
-    {
-    }
+    public function __construct(private PublicationService $publicationService) {}
 
     public function index(Request $request, Village $village): JsonResponse
     {
@@ -33,9 +31,9 @@ class PublicationController extends Controller
         $year = $request->query('year');
 
         $publications = Publication::query()
-            ->with(['uploader:id,full_name', 'village:id,nama_desa,kode_desa'])
+            ->with(['uploader:id,full_name', 'village:id,name,village_code'])
             ->where('desa_id', $village->id)
-            ->when($year, fn ($query) => $query->whereYear('published_at', $year))
+            ->when($year, fn($query) => $query->whereYear('published_at', $year))
             ->orderByDesc('published_at')
             ->paginate($perPage)
             ->appends($request->query());
@@ -54,7 +52,7 @@ class PublicationController extends Controller
 
     public function show(Publication $publication): JsonResponse
     {
-        $publication->loadMissing(['village:id,nama_desa,kode_desa', 'uploader:id,full_name']);
+        $publication->loadMissing(['village:id,name,village_code', 'uploader:id,full_name']);
 
         return response()->json([
             'success' => true,

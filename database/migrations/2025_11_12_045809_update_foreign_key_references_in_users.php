@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,15 +12,18 @@ return new class extends Migration
             $table->dropForeign(['role_id']);
             $table->dropForeign(['desa_id']);
         });
-        
-        DB::statement('ALTER TABLE users CHANGE desa_id village_id BIGINT UNSIGNED NULL');
-        
+
+        // Rename column using Laravel's schema builder (database-agnostic)
+        Schema::table('users', function (Blueprint $table) {
+            $table->renameColumn('desa_id', 'village_id');
+        });
+
         Schema::table('users', function (Blueprint $table) {
             $table->foreign('role_id')
                 ->references('id')
                 ->on('roles')
                 ->onDelete('restrict');
-                
+
             $table->foreign('village_id')
                 ->references('id')
                 ->on('villages')
@@ -35,15 +37,18 @@ return new class extends Migration
             $table->dropForeign(['role_id']);
             $table->dropForeign(['village_id']);
         });
-        
-        DB::statement('ALTER TABLE users CHANGE village_id desa_id BIGINT UNSIGNED NULL');
-        
+
+        // Reverse the column rename
+        Schema::table('users', function (Blueprint $table) {
+            $table->renameColumn('village_id', 'desa_id');
+        });
+
         Schema::table('users', function (Blueprint $table) {
             $table->foreign('role_id')
                 ->references('id')
-                ->on('user_roles')
+                ->on('roles')
                 ->onDelete('restrict');
-                
+
             $table->foreign('desa_id')
                 ->references('id')
                 ->on('desa')

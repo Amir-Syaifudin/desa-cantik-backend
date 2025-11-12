@@ -158,7 +158,7 @@ class VillageStatisticsTest extends TestCase
 
     public function test_export_statistics_returns_file(): void
     {
-        $village = Village::factory()->create(['nama_desa' => 'Nonongan']);
+        $village = Village::factory()->create(['name' => 'Nonongan']);
         $type = StatisticType::factory()->create(['code' => 'POPULATION_TOTAL']);
         $officer = $this->createVillageOfficer($village);
 

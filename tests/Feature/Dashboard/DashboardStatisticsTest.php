@@ -31,7 +31,7 @@ class DashboardStatisticsTest extends TestCase
             ->withoutVillage()
             ->create();
 
-        $village = Village::factory()->create(['nama_desa' => 'Desa Makmur']);
+        $village = Village::factory()->create(['name' => 'Desa Makmur']);
         $profile = VillageProfile::factory()->for($village, 'village')->create(['is_featured' => true]);
         $statType = StatisticType::factory()->create(['code' => 'POPULATION_TOTAL', 'category' => 'kependudukan']);
 

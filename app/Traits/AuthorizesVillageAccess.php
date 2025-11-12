@@ -17,7 +17,7 @@ trait AuthorizesVillageAccess
             return;
         }
 
-        if ($role === UserRole::VILLAGE_OFFICER && (int) $user->desa_id === (int) $village->id) {
+        if ($role === UserRole::VILLAGE_OFFICER && (int) $user->village_id === (int) $village->id) {
             return;
         }
 
