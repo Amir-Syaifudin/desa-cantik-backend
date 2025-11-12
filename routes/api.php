@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PublicationController;
 use App\Http\Controllers\Api\StatisticTypeController;
@@ -14,6 +15,17 @@ use App\Http\Controllers\ThematicMapsController;
 use App\Http\Controllers\VillageModuleController;
 
 Route::prefix('v1')->group(function () {
+    // ===============================================
+    // PUBLIC AUTHENTICATION ENDPOINTS
+    // ===============================================
+    Route::post('auth/register', [AuthController::class, 'register']);
+    Route::post('auth/login', [AuthController::class, 'login']);
+    Route::post('auth/password/forgot', [AuthController::class, 'forgotPassword']);
+    Route::post('auth/password/reset', [AuthController::class, 'resetPassword']);
+
+    // ===============================================
+    // PUBLIC DATA ENDPOINTS
+    // ===============================================
     Route::get('statistic-types', [StatisticTypeController::class, 'index']);
     Route::get('dashboard/public', [DashboardController::class, 'public']);
 
@@ -29,7 +41,18 @@ Route::prefix('v1')->group(function () {
     Route::get('publications/{publication}/download', [PublicationController::class, 'download'])
         ->name('publications.download');
 
+    // ===============================================
+    // PROTECTED ENDPOINTS (Require Authentication)
+    // ===============================================
     Route::middleware('auth:sanctum')->group(function () {
+        // User Profile & Authentication
+        Route::get('auth/user', [AuthController::class, 'me']);
+        Route::put('auth/profile', [AuthController::class, 'updateProfile']);
+        Route::put('auth/password', [AuthController::class, 'updatePassword']);
+        Route::post('auth/logout', [AuthController::class, 'logout']);
+        Route::post('auth/logout/all', [AuthController::class, 'logoutAll']);
+        Route::post('auth/token/refresh', [AuthController::class, 'refresh']);
+
         // Dashboard endpoints with explicit role middleware
         Route::get('dashboard/admin', [DashboardController::class, 'admin'])
             ->middleware('role:bps_admin');
@@ -37,11 +60,10 @@ Route::prefix('v1')->group(function () {
         Route::get('dashboard/village', [DashboardController::class, 'village'])
             ->middleware('role:bps_admin,village_officer');
 
+        // Village Statistics Management (Protected)
         Route::post('villages/{village}/statistics', [VillageStatisticController::class, 'store']);
         Route::put('villages/{village}/statistics/{statistic}', [VillageStatisticController::class, 'update']);
         Route::delete('villages/{village}/statistics/{statistic}', [VillageStatisticController::class, 'destroy']);
-
-        // Import with rate limiting for resource-intensive operations
         Route::post('villages/{village}/statistics/import', [VillageStatisticController::class, 'import'])
             ->middleware('throttle:imports');
 
@@ -52,11 +74,14 @@ Route::prefix('v1')->group(function () {
     });
 });
 
+// Legacy endpoint for backward compatibility
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-#Village Management
+// ===============================================
+// VILLAGE MANAGEMENT ROUTES
+// ===============================================
 // GET /villages (Get All)
 Route::get('/villages', [VillageController::class, 'getAll']);
 
@@ -75,7 +100,9 @@ Route::delete('/villages/{id}', [VillageController::class, 'delete']);
 // PUT /villages/{id}/toggle-status (Toggle Status Aktif)
 Route::put('/villages/{id}/toggle-status', [VillageController::class, 'toggleStatus']);
 
-#Village Profile
+// ===============================================
+// VILLAGE PROFILE ROUTES
+// ===============================================
 // GET /villages/{id}/profile (Get Profile)
 Route::get('/villages/{id}/profile', [VillageProfileController::class, 'getProfile']);
 
@@ -85,7 +112,9 @@ Route::put('/villages/{id}/profile', [VillageProfileController::class, 'updatePr
 // POST /villages/{id}/profile/logo (Upload Logo)
 Route::post('/villages/{id}/profile/logo', [VillageProfileController::class, 'uploadLogo']);
 
-#Geospatial Data
+// ===============================================
+// GEOSPATIAL DATA ROUTES
+// ===============================================
 // GET /villages/{id}/geospatial (Get Data GeoJSON)
 Route::get('/villages/{id}/geospatial', [GeospatialDataController::class, 'getGeoSpatialData']);
 
@@ -98,7 +127,9 @@ Route::put('/villages/{id}/geospatial/{geoId}', [GeospatialDataController::class
 // DELETE /villages/{id}/geospatial/{id} (Delete Geospatial Data)
 Route::delete('/villages/{id}/geospatial/{geoId}', [GeospatialDataController::class, 'deleteGeoSpatialData']);
 
-#Thematic Maps
+// ===============================================
+// THEMATIC MAPS ROUTES
+// ===============================================
 // GET /villages/{id}/thematic-maps (Get Tema Peta)
 Route::get('/villages/{id}/thematic-maps', [ThematicMapsController::class, 'getThematicMaps']);
 
@@ -114,7 +145,9 @@ Route::put('/villages/{id}/thematic-maps/{mapId}', [ThematicMapsController::clas
 // DELETE /villages/{id}/thematic-maps/{id} (Delete Tema)
 Route::delete('/villages/{id}/thematic-maps/{mapId}', [ThematicMapsController::class, 'deleteThematicMap']);
 
-#Map Points
+// ===============================================
+// MAP POINTS ROUTES
+// ===============================================
 // POST /thematic-maps/{id}/points (Create Titik Peta)
 Route::post('/thematic-maps/{id}/points', [MapPointsController::class, 'createMapPoint']);
 
@@ -127,7 +160,9 @@ Route::delete('/thematic-maps/{id}/points/{pointId}', [MapPointsController::clas
 // POST /thematic-maps/{id}/points/{pointId}/image (Upload Gambar Titik)
 Route::post('/thematic-maps/{id}/points/{pointId}/image', [MapPointsController::class, 'uploadMapPointImage']);
 
-#Village Modules
+// ===============================================
+// VILLAGE MODULES ROUTES
+// ===============================================
 // GET /villages/{id}/modules (Get Modul Desa)
 Route::get('/villages/{id}/modules', [VillageModuleController::class, 'getModules']);
 

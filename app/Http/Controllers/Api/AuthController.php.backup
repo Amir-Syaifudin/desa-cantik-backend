@@ -29,7 +29,7 @@ class AuthController extends Controller
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
                 'role_id' => 'required|exists:roles,id',
-                'village_id' => 'nullable|exists:villages,id',
+                'desa_id' => 'nullable|exists:desa,id',
                 'full_name' => 'nullable|string|max:255',
                 'phone' => 'nullable|string|max:20',
             ]);
@@ -47,7 +47,7 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role_id' => $request->role_id,
-                'village_id' => $request->village_id,
+                'desa_id' => $request->desa_id,
                 'full_name' => $request->full_name,
                 'phone' => $request->phone,
                 'is_active' => true,
@@ -65,7 +65,7 @@ class AuthController extends Controller
                         'email' => $user->email,
                         'full_name' => $user->full_name,
                         'role_id' => $user->role_id,
-                        'village_id' => $user->village_id,
+                        'desa_id' => $user->desa_id,
                     ],
                     'token' => $token,
                     'token_type' => 'Bearer'
@@ -122,7 +122,7 @@ class AuthController extends Controller
             }
 
             $token = $user->createToken('auth_token')->plainTextToken;
-            $user->load('role', 'village');
+            $user->load('role', 'desa');
 
             return response()->json([
                 'success' => true,
@@ -138,10 +138,10 @@ class AuthController extends Controller
                             'role_name' => $user->role->role_name,
                             'display_name' => $user->role->display_name,
                         ],
-                        'village' => $user->village ? [
-                            'id' => $user->village->id,
-                            'name' => $user->village->name,
-                            'kode' => $user->village->kode,
+                        'desa' => $user->desa ? [
+                            'id' => $user->desa->id,
+                            'name' => $user->desa->name,
+                            'kode' => $user->desa->kode,
                         ] : null,
                     ],
                     'token' => $token,
@@ -172,7 +172,7 @@ class AuthController extends Controller
     {
         try {
             $user = $request->user();
-            $user->load('role', 'village');
+            $user->load('role', 'desa');
 
             return response()->json([
                 'success' => true,
@@ -188,10 +188,10 @@ class AuthController extends Controller
                         'role_name' => $user->role->role_name,
                         'display_name' => $user->role->display_name,
                     ],
-                    'village' => $user->village ? [
-                        'id' => $user->village->id,
-                        'name' => $user->village->name,
-                        'kode' => $user->village->kode,
+                    'desa' => $user->desa ? [
+                        'id' => $user->desa->id,
+                        'name' => $user->desa->name,
+                        'kode' => $user->desa->kode,
                     ] : null,
                     'created_at' => $user->created_at,
                     'updated_at' => $user->updated_at,

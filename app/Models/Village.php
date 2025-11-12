@@ -22,11 +22,11 @@ class Village extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $table = 'desa';
+    protected $table = 'villages';
 
     protected $fillable = [
-        'kode_desa',
-        'nama_desa',
+        'village_code',
+        'name',
         'kecamatan',
         'kabupaten',
         'provinsi',
@@ -37,6 +37,11 @@ class Village extends Model
     protected $casts = [
         'is_visible' => 'boolean',
     ];
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class, 'village_id');
+    }
 
     public function statistics(): HasMany
     {
