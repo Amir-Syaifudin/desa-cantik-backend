@@ -10,6 +10,7 @@ use App\Http\Resources\PublicationResource;
 use App\Models\Publication;
 use App\Models\User;
 use App\Models\Village;
+use App\Services\ActivityLogger;
 use App\Services\PublicationService;
 use App\Traits\AuthorizesVillageAccess;
 use Illuminate\Http\JsonResponse;
@@ -83,6 +84,13 @@ class PublicationController extends Controller
 
         $publication->load(['uploader:id,full_name']);
 
+        ActivityLogger::log(
+            'create',
+            $publication,
+            sprintf('Mengunggah publikasi %s', $publication->title),
+            ['new_data' => $publication->toArray()]
+        );
+
         return response()->json([
             'success' => true,
             'message' => 'Publikasi berhasil diunggah',
@@ -96,8 +104,20 @@ class PublicationController extends Controller
         $this->authorizeVillageAccess($village, $user);
         $this->ensurePublicationBelongsToVillage($publication, $village);
 
-        $publication->fill($request->validated());
+        $data = $request->validated();
+        $original = $publication->toArray();
+        $publication->fill($data);
         $publication->save();
+
+        ActivityLogger::log(
+            'update',
+            $publication,
+            sprintf('Memperbarui publikasi %s', $publication->title),
+            [
+                'old_data' => $original,
+                'new_data' => $publication->toArray(),
+            ]
+        );
 
         return response()->json([
             'success' => true,
@@ -112,6 +132,7 @@ class PublicationController extends Controller
         $this->authorizeVillageAccess($village, $user);
         $this->ensurePublicationBelongsToVillage($publication, $village);
 
+        $original = $publication->only(['file_path', 'file_name']);
         $this->publicationService->deleteFile($publication->file_path);
         $fileMeta = $this->publicationService->storeFile($request->file('file'), $village);
 
@@ -122,6 +143,16 @@ class PublicationController extends Controller
             'file_size_bytes' => $fileMeta['file_size_bytes'],
             'file_url' => Storage::disk('public')->url($fileMeta['file_path']),
         ]);
+
+        ActivityLogger::log(
+            'update',
+            $publication,
+            sprintf('Mengganti file publikasi %s', $publication->title),
+            [
+                'old_data' => $original,
+                'new_data' => $publication->only(['file_path', 'file_name']),
+            ]
+        );
 
         return response()->json([
             'success' => true,
@@ -135,6 +166,15 @@ class PublicationController extends Controller
         $user = $this->user();
         $this->authorizeVillageAccess($village, $user);
         $this->ensurePublicationBelongsToVillage($publication, $village);
+
+        $snapshot = $publication->toArray();
+
+        ActivityLogger::log(
+            'delete',
+            $publication,
+            sprintf('Menghapus publikasi %s', $snapshot['title'] ?? 'Publikasi'),
+            ['old_data' => $snapshot]
+        );
 
         $this->publicationService->deleteFile($publication->file_path);
         $publication->delete();
