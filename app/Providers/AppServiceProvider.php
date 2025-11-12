@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Publication;
+use App\Observers\PublicationObserver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -21,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Publication::observe(PublicationObserver::class);
+
         // Rate limiting for imports - 5 requests per hour
         RateLimiter::for('imports', function ($request) {
             return Limit::perHour(5)->by($request->user()?->id ?: $request->ip())
