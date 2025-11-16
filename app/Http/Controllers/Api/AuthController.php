@@ -71,7 +71,6 @@ class AuthController extends Controller
                     'token_type' => 'Bearer'
                 ]
             ], 201);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -83,6 +82,7 @@ class AuthController extends Controller
 
     /**
      * Login user with email OR username (COMPLIANCE FIX)
+     * Accepts both 'login' and 'username' fields for frontend compatibility
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -90,8 +90,10 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
+            // Accept either 'login' OR 'username' field for flexibility
             $validator = Validator::make($request->all(), [
-                'login' => 'required|string', // Can be email OR username
+                'login' => 'required_without:username|string',
+                'username' => 'required_without:login|string',
                 'password' => 'required|string',
             ]);
 
@@ -103,14 +105,19 @@ class AuthController extends Controller
                 ], 422);
             }
 
+            // Use whichever field is provided (login or username)
+            $loginField = $request->input('login') ?? $request->input('username');
+
             // Find user by email OR username
-            $user = User::where('email', $request->login)
-                        ->orWhere('username', $request->login)
-                        ->first();
+            $user = User::where('email', $loginField)
+                ->orWhere('username', $loginField)
+                ->first();
 
             if (!$user || !Hash::check($request->password, $user->password)) {
+                // Return error with both field names for compatibility
                 throw ValidationException::withMessages([
                     'login' => ['The provided credentials are incorrect.'],
+                    'username' => ['The provided credentials are incorrect.'],
                 ]);
             }
 
@@ -148,14 +155,12 @@ class AuthController extends Controller
                     'token_type' => 'Bearer'
                 ]
             ], 200);
-
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid credentials',
                 'errors' => $e->errors()
             ], 401);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -197,7 +202,6 @@ class AuthController extends Controller
                     'updated_at' => $user->updated_at,
                 ]
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -245,7 +249,6 @@ class AuthController extends Controller
                     'phone' => $user->phone,
                 ]
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -299,7 +302,6 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Password updated successfully. Please login again.'
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -355,7 +357,6 @@ class AuthController extends Controller
                     'email' => $user->email
                 ]
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -389,7 +390,7 @@ class AuthController extends Controller
             }
 
             // Verify token
-                $passwordReset = DB::table('password_reset_tokens')
+            $passwordReset = DB::table('password_reset_tokens')
                 ->where('email', $request->email)
                 ->first();
 
@@ -424,7 +425,6 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Password has been reset successfully'
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -446,7 +446,6 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Logout successful'
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -468,7 +467,6 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Logged out from all devices successfully'
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -496,7 +494,6 @@ class AuthController extends Controller
                     'token_type' => 'Bearer'
                 ]
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
