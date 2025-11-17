@@ -131,10 +131,9 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
-            // Accept either 'login' OR 'username' field for flexibility
+            // Accept ONLY 'username' field per spec
             $validator = Validator::make($request->all(), [
-                'login' => 'required_without:username|string',
-                'username' => 'required_without:login|string',
+                'username' => 'required|string',
                 'password' => 'required|string',
             ]);
 
@@ -146,18 +145,13 @@ class AuthController extends Controller
                 ], 422);
             }
 
-            // Use whichever field is provided (login or username)
-            $loginField = $request->input('login') ?? $request->input('username');
-
             // Find user by email OR username
-            $user = User::where('email', $loginField)
-                ->orWhere('username', $loginField)
+            $user = User::where('email', $request->username)
+                ->orWhere('username', $request->username)
                 ->first();
 
             if (!$user || !Hash::check($request->password, $user->password)) {
-                // Return error with both field names for compatibility
                 throw ValidationException::withMessages([
-                    'login' => ['The provided credentials are incorrect.'],
                     'username' => ['The provided credentials are incorrect.'],
                 ]);
             }
@@ -465,11 +459,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Password reset link sent to your email',
-                'data' => [
-                    'reset_token' => $token, // Remove in production!
-                    'email' => $user->email
-                ]
+                'message' => 'Password reset link has been sent to your email'
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
