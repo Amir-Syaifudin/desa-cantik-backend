@@ -44,8 +44,7 @@ Route::prefix('v1')->group(function () {
     Route::get('villages/{village_id}/thematic-maps', [ThematicMapController::class, 'index']);
     Route::get('thematic-maps/{map_id}', [ThematicMapController::class, 'show']);
 
-    // Village Modules (Public reads)
-    Route::get('villages/{village_id}/modules', [VillageModuleController::class, 'index']);
+
 
     Route::get('villages/{village}/statistics', [VillageStatisticController::class, 'index']);
     Route::get('villages/{village}/statistics/summary', [VillageStatisticController::class, 'summary']);
@@ -92,6 +91,7 @@ Route::prefix('v1')->group(function () {
 
             // Activity Logs (BPS Admin only)
             Route::get('activity-logs', [ActivityLogController::class, 'index']);
+            Route::get('activity-logs/export', [ActivityLogController::class, 'export']);
             Route::get('activity-logs/{id}', [ActivityLogController::class, 'show']);
 
             // Villages Management (BPS Admin only)
@@ -134,6 +134,8 @@ Route::prefix('v1')->group(function () {
         Route::post('thematic-maps/{map_id}/points/{point_id}/image', [MapPointController::class, 'uploadImage']);
 
         // Village Modules Management (BPS Admin only)
+        Route::get('villages/{village_id}/modules', [VillageModuleController::class, 'index'])
+            ->middleware('role:bps_admin');
         Route::put('villages/{village_id}/modules/{module_name}/toggle', [VillageModuleController::class, 'toggle'])
             ->middleware('role:bps_admin');
     });

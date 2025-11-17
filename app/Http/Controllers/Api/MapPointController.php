@@ -206,7 +206,7 @@ class MapPointController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'image' => 'required|file|mimes:jpeg,jpg,png|max:2048',
+            'image' => 'required|file|mimes:jpeg,jpg,png|max:3072',
         ]);
 
         if ($validator->fails()) {

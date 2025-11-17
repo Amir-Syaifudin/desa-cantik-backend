@@ -217,6 +217,8 @@ class ThematicMapController extends Controller
             'old_data' => $map->toArray(),
         ]);
 
+        // Cascade delete all map points
+        $map->mapPoints()->delete();
         $map->delete();
 
         return response()->json([

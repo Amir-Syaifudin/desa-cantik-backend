@@ -108,12 +108,15 @@ class ActivityLogController extends Controller
             $query->where('model_type', 'LIKE', '%' . $request->query('model_type') . '%');
         }
 
-        if ($request->filled('from_date')) {
-            $query->where('created_at', '>=', $request->query('from_date'));
+        // Support both spec's date_from/date_to and legacy from_date/to_date
+        if ($request->filled('date_from') || $request->filled('from_date')) {
+            $dateFrom = $request->query('date_from') ?? $request->query('from_date');
+            $query->where('created_at', '>=', $dateFrom);
         }
 
-        if ($request->filled('to_date')) {
-            $query->where('created_at', '<=', $request->query('to_date'));
+        if ($request->filled('date_to') || $request->filled('to_date')) {
+            $dateTo = $request->query('date_to') ?? $request->query('to_date');
+            $query->where('created_at', '<=', $dateTo);
         }
 
         $logs = $query->orderBy('created_at', 'desc')->paginate($perPage);
@@ -175,10 +178,96 @@ class ActivityLogController extends Controller
                 'description' => $log->description,
                 'old_data' => $log->old_data,
                 'new_data' => $log->new_data,
+                'changes' => $this->calculateChanges($log->old_data, $log->new_data),
                 'ip_address' => $log->ip_address,
                 'user_agent' => $log->user_agent,
                 'created_at' => $log->created_at,
             ]
         ]);
+    }
+
+    /**
+     * Export activity logs to CSV (BPS Admin only)
+     */
+    public function export(Request $request)
+    {
+        $query = ActivityLog::query()
+            ->with(['user:id,username,full_name', 'village:id,name,code']);
+
+        // Apply same filters as index
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->query('user_id'));
+        }
+        if ($request->filled('village_id')) {
+            $query->where('village_id', $request->query('village_id'));
+        }
+        if ($request->filled('action')) {
+            $query->where('action', $request->query('action'));
+        }
+        if ($request->filled('model_type')) {
+            $query->where('model_type', 'LIKE', '%' . $request->query('model_type') . '%');
+        }
+        if ($request->filled('date_from') || $request->filled('from_date')) {
+            $dateFrom = $request->query('date_from') ?? $request->query('from_date');
+            $query->where('created_at', '>=', $dateFrom);
+        }
+        if ($request->filled('date_to') || $request->filled('to_date')) {
+            $dateTo = $request->query('date_to') ?? $request->query('to_date');
+            $query->where('created_at', '<=', $dateTo);
+        }
+
+        $logs = $query->orderBy('created_at', 'desc')->get();
+
+        $filename = 'activity-logs-' . date('Y-m-d-His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename={$filename}",
+        ];
+
+        $callback = function () use ($logs) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['ID', 'User', 'Village', 'Action', 'Model Type', 'Model ID', 'Description', 'IP Address', 'Created At']);
+
+            foreach ($logs as $log) {
+                fputcsv($file, [
+                    $log->id,
+                    $log->user ? $log->user->username : 'N/A',
+                    $log->village ? $log->village->name : 'N/A',
+                    $log->action,
+                    $log->model_type,
+                    $log->model_id,
+                    $log->description,
+                    $log->ip_address,
+                    $log->created_at,
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Calculate changes between old and new data
+     */
+    private function calculateChanges($oldData, $newData): array
+    {
+        if (!$oldData || !$newData) {
+            return [];
+        }
+
+        $changes = [];
+        foreach ($newData as $key => $newValue) {
+            $oldValue = $oldData[$key] ?? null;
+            if ($oldValue !== $newValue) {
+                $changes[] = [
+                    'field' => $key,
+                    'old' => $oldValue,
+                    'new' => $newValue,
+                ];
+            }
+        }
+
+        return $changes;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,12 +17,14 @@ class GeospatialData extends Model
         'desa_id',
         'geometry_type',
         'geojson_data',
+        'properties',
         'description',
         'uploaded_by',
     ];
 
     protected $casts = [
         'geojson_data' => 'array',
+        'properties' => 'array',
     ];
 
     // Relasi dengan tabel Village (relasi banyak ke satu)

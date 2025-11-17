@@ -249,6 +249,7 @@ class UserController extends Controller
             'username' => 'sometimes|string|max:100|unique:users,username,' . $id,
             'email' => 'sometimes|email|max:255|unique:users,email,' . $id,
             'full_name' => 'sometimes|string|max:255',
+            'role' => ['sometimes', Rule::in([UserRole::BPS_ADMIN, UserRole::VILLAGE_OFFICER])],
             'village_id' => 'sometimes|nullable|exists:villages,id',
             'phone' => 'nullable|string|max:20',
             'is_active' => 'sometimes|boolean',
@@ -267,6 +268,10 @@ class UserController extends Controller
         if ($request->has('username')) $user->username = $request->username;
         if ($request->has('email')) $user->email = $request->email;
         if ($request->has('full_name')) $user->full_name = $request->full_name;
+        if ($request->has('role')) {
+            $role = UserRole::where('role_name', $request->role)->firstOrFail();
+            $user->role_id = $role->id;
+        }
         if ($request->has('village_id')) $user->village_id = $request->village_id;
         if ($request->has('phone')) $user->phone_number = $request->phone;
         if ($request->has('is_active')) $user->is_active = $request->is_active;
