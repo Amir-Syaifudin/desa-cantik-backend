@@ -12,14 +12,33 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use OpenApi\Annotations as OA;
 
 class AuthController extends Controller
 {
     /**
-     * Register a new user
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/api/v1/auth/register",
+     *     tags={"Auth"},
+     *     summary="Register a new user",
+     *     description="Creates a new user account and returns an initial Sanctum bearer token.",
+     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/RegisterRequest")),
+     *     @OA\Response(
+     *         response=201,
+     *         description="User registered successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/AuthResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Unexpected error",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     )
+     * )
      */
     public function register(Request $request)
     {
@@ -81,11 +100,33 @@ class AuthController extends Controller
     }
 
     /**
-     * Login user with email OR username (COMPLIANCE FIX)
-     * Accepts both 'login' and 'username' fields for frontend compatibility
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/api/v1/auth/login",
+     *     tags={"Auth"},
+     *     summary="Login with email or username",
+     *     description="Authenticates a user and returns a Sanctum bearer token. Accepts either email or username in the `login` field.",
+     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/LoginRequest")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login successful",
+     *         @OA\JsonContent(ref="#/components/schemas/AuthResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Invalid credentials",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Unexpected error",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     )
+     * )
      */
     public function login(Request $request)
     {
@@ -171,7 +212,26 @@ class AuthController extends Controller
     }
 
     /**
-     * Get authenticated user profile
+     * @OA\Get(
+     *     path="/api/v1/auth/user",
+     *     tags={"Auth"},
+     *     summary="Get authenticated user profile",
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Authenticated user detail",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/AuthUser")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     )
+     * )
      */
     public function me(Request $request)
     {
@@ -212,10 +272,28 @@ class AuthController extends Controller
     }
 
     /**
-     * Update user profile (NEW - Requirement 14)
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Put(
+     *     path="/api/v1/auth/profile",
+     *     tags={"Auth"},
+     *     summary="Update authenticated user profile",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/UpdateProfileRequest")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profile updated",
+     *         @OA\JsonContent(ref="#/components/schemas/UserProfileResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     )
+     * )
      */
     public function updateProfile(Request $request)
     {
@@ -259,10 +337,28 @@ class AuthController extends Controller
     }
 
     /**
-     * Update password (NEW - Requirement 14)
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Put(
+     *     path="/api/v1/auth/password",
+     *     tags={"Auth"},
+     *     summary="Update password",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/UpdatePasswordRequest")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password updated",
+     *         @OA\JsonContent(ref="#/components/schemas/MessageResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Current password invalid or unauthenticated",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
+     *     )
+     * )
      */
     public function updatePassword(Request $request)
     {
@@ -312,10 +408,28 @@ class AuthController extends Controller
     }
 
     /**
-     * Request password reset (NEW - Requirement 20, Client Feedback 11c)
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/api/v1/auth/password/forgot",
+     *     tags={"Auth"},
+     *     summary="Request password reset link",
+     *     description="Generates a reset token and sends the password reset link to the user email. The raw token is returned in the response for non-production environments.",
+     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/ForgotPasswordRequest")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Reset link created",
+     *         @OA\JsonContent(ref="#/components/schemas/PasswordResetLinkResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Unexpected error",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     )
+     * )
      */
     public function forgotPassword(Request $request)
     {
@@ -367,10 +481,32 @@ class AuthController extends Controller
     }
 
     /**
-     * Reset password with token (NEW)
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Post(
+     *     path="/api/v1/auth/password/reset",
+     *     tags={"Auth"},
+     *     summary="Reset password with token",
+     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/ResetPasswordRequest")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password reset successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/MessageResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid or expired reset token",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Unexpected error",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     )
+     * )
      */
     public function resetPassword(Request $request)
     {
@@ -435,7 +571,22 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout user (revoke current token)
+     * @OA\Post(
+     *     path="/api/v1/auth/logout",
+     *     tags={"Auth"},
+     *     summary="Logout current session",
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Logout successful",
+     *         @OA\JsonContent(ref="#/components/schemas/MessageResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     )
+     * )
      */
     public function logout(Request $request)
     {
@@ -456,7 +607,22 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout from all devices
+     * @OA\Post(
+     *     path="/api/v1/auth/logout/all",
+     *     tags={"Auth"},
+     *     summary="Logout from all devices",
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="All tokens revoked",
+     *         @OA\JsonContent(ref="#/components/schemas/MessageResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     )
+     * )
      */
     public function logoutAll(Request $request)
     {
@@ -477,7 +643,22 @@ class AuthController extends Controller
     }
 
     /**
-     * Refresh token
+     * @OA\Post(
+     *     path="/api/v1/auth/token/refresh",
+     *     tags={"Auth"},
+     *     summary="Refresh Sanctum token",
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Token refreshed",
+     *         @OA\JsonContent(ref="#/components/schemas/TokenResponse")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
+     *     )
+     * )
      */
     public function refresh(Request $request)
     {

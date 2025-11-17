@@ -18,31 +18,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-/**
- * @OA\Info(
- *     title="Desa Cantik API",
- *     version="1.0.0",
- *     description="API untuk Sistem Informasi Desa Cantik (Desa Cinta Statistik)",
- *     @OA\Contact(
- *         email="support@bpstorut.go.id",
- *         name="BPS Kabupaten Toraja Utara"
- *     )
- * )
- *
- * @OA\Server(
- *     url="/api/v1",
- *     description="API Server"
- * )
- *
- * @OA\SecurityScheme(
- *     securityScheme="sanctum",
- *     type="http",
- *     scheme="bearer",
- *     bearerFormat="Token"
- * )
- */
 class VillageStatisticController extends Controller
 {
     public function __construct(
