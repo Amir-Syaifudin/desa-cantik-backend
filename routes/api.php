@@ -117,6 +117,8 @@ Route::post('/villages/{id}/profile/logo', [VillageProfileController::class, 'up
 // ===============================================
 // GET /villages/{id}/geospatial (Get Data GeoJSON)
 Route::get('/villages/{id}/geospatial', [GeospatialDataController::class, 'getGeoSpatialData']);
+// GET /villages/{id}/geospatial/{geoId} (Get single GeoJSON payload)
+Route::get('/villages/{id}/geospatial/{geoId}', [GeospatialDataController::class, 'showGeoSpatialData']);
 
 // POST /villages/{id}/geospatial (Create Geospatial Data)
 Route::post('/villages/{id}/geospatial', [GeospatialDataController::class, 'createGeoSpatialData']);

@@ -13,13 +13,20 @@ class GeospatialData extends Model
 
     // Kolom yang bisa diisi (mass assignable)
     protected $fillable = [
-        'village_id', // ID desa yang terkait dengan data geospasial
-        'data', // Data GeoJSON
+        'desa_id',
+        'geometry_type',
+        'geojson_data',
+        'description',
+        'uploaded_by',
+    ];
+
+    protected $casts = [
+        'geojson_data' => 'array',
     ];
 
     // Relasi dengan tabel Village (relasi banyak ke satu)
     public function village()
     {
-        return $this->belongsTo(Village::class);
+        return $this->belongsTo(Village::class, 'desa_id');
     }
 }
