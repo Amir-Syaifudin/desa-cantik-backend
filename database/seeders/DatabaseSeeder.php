@@ -13,6 +13,8 @@ class DatabaseSeeder extends Seeder
             VillageSeeder::class,
             StatisticTypeSeeder::class,
             UserSeeder::class,
+            GeospatialDataSeeder::class,
+            ThematicMapSeeder::class,
         ]);
 
         $this->command->newLine();
