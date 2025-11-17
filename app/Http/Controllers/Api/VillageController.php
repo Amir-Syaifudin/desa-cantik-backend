@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use OpenApi\Annotations as OA;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class VillageController extends Controller
 {
@@ -50,13 +51,13 @@ class VillageController extends Controller
         $perPage = min((int) $request->query('per_page', 15), 100);
 
         $query = Village::query()
-            ->with(['profile:id,village_id,description,population,area'])
-            ->select(['id', 'code', 'name', 'district', 'subdistrict', 'is_active', 'display_order', 'created_at', 'updated_at']);
+            ->with(['profile:id,village_id,deskripsi,area,population,households,male_population,female_population,population_density,thumbnail_url,logo_url'])
+            ->select(['id', 'village_code', 'name', 'kecamatan', 'kabupaten', 'provinsi', 'logo_url', 'is_visible', 'created_at', 'updated_at']);
 
         // Filter by active status (default true for public)
-        $isActive = $request->query('is_active', 'true');
-        if ($isActive !== 'all') {
-            $query->where('is_active', filter_var($isActive, FILTER_VALIDATE_BOOLEAN));
+        $isVisible = $request->query('is_active', 'true'); // keep query name for backward compatibility
+        if ($isVisible !== 'all') {
+            $query->where('is_visible', filter_var($isVisible, FILTER_VALIDATE_BOOLEAN));
         }
 
         // Search filter
@@ -64,15 +65,17 @@ class VillageController extends Controller
             $search = $request->query('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('district', 'LIKE', "%{$search}%");
+                    ->orWhere('kecamatan', 'LIKE', "%{$search}%")
+                    ->orWhere('kabupaten', 'LIKE', "%{$search}%");
             });
         }
 
-        $villages = $query->orderBy('display_order')->orderBy('name')->paginate($perPage);
+        /** @var LengthAwarePaginator $villages */
+        $villages = $query->orderBy('name')->paginate($perPage);
 
         return response()->json([
             'success' => true,
-            'data' => $villages->items(),
+            'data' => collect($villages->items())->map(fn (Village $village) => $this->mapVillageToFrontendPayload($village))->values(),
             'meta' => [
                 'current_page' => $villages->currentPage(),
                 'per_page' => $villages->perPage(),
@@ -100,35 +103,12 @@ class VillageController extends Controller
     public function show($id): JsonResponse
     {
         $village = Village::with([
-            'profile:id,village_id,description,vision,mission,area,population,population_density,address,phone,email,website,logo_url'
+            'profile:id,village_id,deskripsi,visi,misi,area,population,households,male_population,female_population,population_density,address,phone,email,website,logo_url,thumbnail_url'
         ])->findOrFail($id);
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'id' => $village->id,
-                'code' => $village->code,
-                'name' => $village->name,
-                'district' => $village->district,
-                'subdistrict' => $village->subdistrict,
-                'is_active' => $village->is_active,
-                'display_order' => $village->display_order,
-                'profile' => $village->profile ? [
-                    'description' => $village->profile->description,
-                    'vision' => $village->profile->vision,
-                    'mission' => $village->profile->mission,
-                    'area' => $village->profile->area,
-                    'population' => $village->profile->population,
-                    'population_density' => $village->profile->population_density,
-                    'address' => $village->profile->address,
-                    'phone' => $village->profile->phone,
-                    'email' => $village->profile->email,
-                    'website' => $village->profile->website,
-                    'logo_url' => $village->profile->logo_url,
-                ] : null,
-                'created_at' => $village->created_at,
-                'updated_at' => $village->updated_at,
-            ]
+            'data' => $this->mapVillageToFrontendPayload($village, true),
         ]);
     }
 
@@ -145,7 +125,7 @@ class VillageController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'code' => 'required|string|max:20|unique:villages',
+            'code' => 'required|string|max:20|unique:villages,village_code',
             'name' => 'required|string|max:255',
             'district' => 'required|string|max:255',
             'subdistrict' => 'sometimes|string|max:255',
@@ -161,12 +141,12 @@ class VillageController extends Controller
         }
 
         $village = Village::create([
-            'code' => $request->code,
+            'village_code' => $request->code,
             'name' => $request->name,
-            'district' => $request->district,
-            'subdistrict' => $request->subdistrict ?? 'Toraja Utara',
-            'is_active' => true,
-            'display_order' => $request->display_order ?? 0,
+            'kecamatan' => $request->district,
+            'kabupaten' => $request->subdistrict ?? 'Toraja Utara',
+            'provinsi' => $request->province ?? 'Sulawesi Selatan',
+            'is_visible' => true,
         ]);
 
         ActivityLogger::log('create', $village, 'Village created');
@@ -201,11 +181,11 @@ class VillageController extends Controller
         $village = Village::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'code' => 'sometimes|string|max:20|unique:villages,code,' . $id,
+            'code' => 'sometimes|string|max:20|unique:villages,village_code,' . $id,
             'name' => 'sometimes|string|max:255',
             'district' => 'sometimes|string|max:255',
             'subdistrict' => 'sometimes|string|max:255',
-            'display_order' => 'sometimes|integer',
+            'province' => 'sometimes|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -218,11 +198,11 @@ class VillageController extends Controller
 
         $oldData = $village->toArray();
 
-        if ($request->has('code')) $village->code = $request->code;
+        if ($request->has('code')) $village->village_code = $request->code;
         if ($request->has('name')) $village->name = $request->name;
-        if ($request->has('district')) $village->district = $request->district;
-        if ($request->has('subdistrict')) $village->subdistrict = $request->subdistrict;
-        if ($request->has('display_order')) $village->display_order = $request->display_order;
+        if ($request->has('district')) $village->kecamatan = $request->district;
+        if ($request->has('subdistrict')) $village->kabupaten = $request->subdistrict;
+        if ($request->has('province')) $village->provinsi = $request->province;
 
         $village->save();
 
@@ -305,13 +285,13 @@ class VillageController extends Controller
             ], 422);
         }
 
-        $oldStatus = $village->is_active;
-        $village->is_active = $request->is_active;
+        $oldStatus = $village->is_visible;
+        $village->is_visible = $request->is_active;
         $village->save();
 
         ActivityLogger::log('update', $village, 'Village status toggled', [
             'old_data' => ['is_active' => $oldStatus],
-            'new_data' => ['is_active' => $village->is_active],
+            'new_data' => ['is_active' => $village->is_visible],
         ]);
 
         return response()->json([
@@ -320,8 +300,44 @@ class VillageController extends Controller
             'data' => [
                 'id' => $village->id,
                 'name' => $village->name,
-                'is_active' => $village->is_active,
+                'is_active' => $village->is_visible,
             ]
         ]);
+    }
+
+    protected function mapVillageToFrontendPayload(Village $village, bool $detailed = false): array
+    {
+        $profile = $village->profile;
+
+        $payload = [
+            'id' => (string) $village->id,
+            'name' => $village->name,
+            'district' => $village->kecamatan,
+            'regency' => $village->kabupaten,
+            'province' => $village->provinsi,
+            'population' => $profile?->population ?? 0,
+            'status' => $village->is_visible ? 'Aktif' : 'Tidak Aktif',
+            'image' => $profile?->thumbnail_url
+                ?? $profile?->logo_url
+                ?? $village->logo_url
+                ?? 'https://placehold.co/800x600/1C6EA4/FFFFFF?text=Desa+Cantik',
+            'area' => $profile?->area ?? 0.0,
+            'households' => $profile?->households ?? 0,
+            'malePopulation' => $profile?->male_population ?? 0,
+            'femalePopulation' => $profile?->female_population ?? 0,
+        ];
+
+        if ($detailed) {
+            $payload['description'] = $profile?->deskripsi;
+            $payload['vision'] = $profile?->visi;
+            $payload['mission'] = $profile?->misi;
+            $payload['address'] = $profile?->address;
+            $payload['phone'] = $profile?->phone;
+            $payload['email'] = $profile?->email;
+            $payload['website'] = $profile?->website;
+            $payload['updated_at'] = $village->updated_at;
+        }
+
+        return $payload;
     }
 }

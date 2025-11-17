@@ -141,6 +141,10 @@ Route::prefix('v1')->group(function () {
     });
 });
 
+// Backward compatible village endpoints (without version prefix) for frontend mock expectations
+Route::get('villages', [VillageController::class, 'index']);
+Route::get('villages/{id}', [VillageController::class, 'show']);
+
 // Legacy endpoint for backward compatibility
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
