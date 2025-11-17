@@ -12,7 +12,7 @@ class VillageController extends Controller
         $villages = Village::with('profile')
             ->orderBy('name')
             ->get()
-            ->map(fn(Village $village) => $this->formatVillageResponse($village));
+            ->map(fn (Village $village) => $this->formatVillageResponse($village));
 
         return response()->json($villages);
     }

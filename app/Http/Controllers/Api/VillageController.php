@@ -7,9 +7,9 @@ use App\Models\Village;
 use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Validator;
 use OpenApi\Attributes as OA;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class VillageController extends Controller
 {
@@ -55,7 +55,7 @@ class VillageController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => collect($villages->items())->map(fn(Village $village) => $this->mapVillageToFrontendPayload($village))->values(),
+            'data' => collect($villages->items())->map(fn (Village $village) => $this->mapVillageToFrontendPayload($village))->values(),
             'meta' => [
                 'current_page' => $villages->currentPage(),
                 'per_page' => $villages->perPage(),
@@ -75,7 +75,7 @@ class VillageController extends Controller
     public function show($id): JsonResponse
     {
         $village = Village::with([
-            'profile:id,village_id,deskripsi,visi,misi,area,population,households,male_population,female_population,population_density,address,phone,email,website,logo_url,thumbnail_url'
+            'profile:id,village_id,deskripsi,visi,misi,area,population,households,male_population,female_population,population_density,address,phone,email,website,logo_url,thumbnail_url',
         ])->findOrFail($id);
 
         return response()->json([
@@ -148,7 +148,7 @@ class VillageController extends Controller
         $village = Village::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'code' => 'sometimes|string|max:20|unique:villages,village_code,' . $id,
+            'code' => 'sometimes|string|max:20|unique:villages,village_code,'.$id,
             'name' => 'sometimes|string|max:255',
             'district' => 'sometimes|string|max:255',
             'subdistrict' => 'sometimes|string|max:255',
@@ -165,12 +165,21 @@ class VillageController extends Controller
 
         $oldData = $village->toArray();
 
-        if ($request->has('code')) $village->village_code = $request->code;
-        if ($request->has('name')) $village->name = $request->name;
-        if ($request->has('district')) $village->kecamatan = $request->district;
-        if ($request->has('subdistrict')) $village->kabupaten = $request->subdistrict;
-        if ($request->has('province')) $village->provinsi = $request->province;
-
+        if ($request->has('code')) {
+            $village->village_code = $request->code;
+        }
+        if ($request->has('name')) {
+            $village->name = $request->name;
+        }
+        if ($request->has('district')) {
+            $village->kecamatan = $request->district;
+        }
+        if ($request->has('subdistrict')) {
+            $village->kabupaten = $request->subdistrict;
+        }
+        if ($request->has('province')) {
+            $village->provinsi = $request->province;
+        }
 
         $village->save();
 

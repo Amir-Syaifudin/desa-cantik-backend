@@ -67,7 +67,7 @@ class ActivityLogController extends Controller
         }
 
         if ($request->filled('model_type')) {
-            $query->where('model_type', 'LIKE', '%' . $request->query('model_type') . '%');
+            $query->where('model_type', 'LIKE', '%'.$request->query('model_type').'%');
         }
 
         // Support both spec's date_from/date_to and legacy from_date/to_date
@@ -163,7 +163,7 @@ class ActivityLogController extends Controller
             $query->where('action', $request->query('action'));
         }
         if ($request->filled('model_type')) {
-            $query->where('model_type', 'LIKE', '%' . $request->query('model_type') . '%');
+            $query->where('model_type', 'LIKE', '%'.$request->query('model_type').'%');
         }
         if ($request->filled('date_from') || $request->filled('from_date')) {
             $dateFrom = $request->query('date_from') ?? $request->query('from_date');
@@ -176,7 +176,7 @@ class ActivityLogController extends Controller
 
         $logs = $query->orderBy('created_at', 'desc')->get();
 
-        $filename = 'activity-logs-' . date('Y-m-d-His') . '.csv';
+        $filename = 'activity-logs-'.date('Y-m-d-His').'.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename={$filename}",

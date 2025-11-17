@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserRole;
-use App\Models\Village;
 use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -120,7 +119,7 @@ class UserController extends Controller
         summary: 'Create new user',
         description: 'Create a new user account (BPS Admin only)',
         security: [['sanctum' => []]],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent()),
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent),
         responses: [new OA\Response(response: 201, description: 'User created successfully'), new OA\Response(response: 422, description: 'Validation error')]
     )]
     public function store(Request $request): JsonResponse
@@ -131,7 +130,7 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'full_name' => 'required|string|max:255',
             'role' => ['required', Rule::in([UserRole::BPS_ADMIN, UserRole::VILLAGE_OFFICER])],
-            'village_id' => 'required_if:role,' . UserRole::VILLAGE_OFFICER . '|nullable|exists:villages,id',
+            'village_id' => 'required_if:role,'.UserRole::VILLAGE_OFFICER.'|nullable|exists:villages,id',
             'phone' => 'nullable|string|max:20',
         ]);
 
@@ -204,8 +203,8 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'username' => 'sometimes|string|max:100|unique:users,username,' . $id,
-            'email' => 'sometimes|email|max:255|unique:users,email,' . $id,
+            'username' => 'sometimes|string|max:100|unique:users,username,'.$id,
+            'email' => 'sometimes|email|max:255|unique:users,email,'.$id,
             'full_name' => 'sometimes|string|max:255',
             'role' => ['sometimes', Rule::in([UserRole::BPS_ADMIN, UserRole::VILLAGE_OFFICER])],
             'village_id' => 'sometimes|nullable|exists:villages,id',

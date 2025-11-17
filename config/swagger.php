@@ -19,7 +19,7 @@ return [
     'output' => [
         'json' => storage_path('api-docs/api-docs.json'),
         'yaml' => storage_path('api-docs/api-docs.yaml'),
-        'dir'  => storage_path('api-docs'),
+        'dir' => storage_path('api-docs'),
     ],
 
     /* Base path for API endpoints (used by docs/UI) */

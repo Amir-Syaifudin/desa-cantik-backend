@@ -33,8 +33,9 @@ class UserSeeder extends Seeder
         $desaRole = UserRole::where('role_name', 'desa_admin')->first();
 
         // Verify required roles exist
-        if (!$bpsAdminRole || !$villageOfficerRole || !$guestRole) {
+        if (! $bpsAdminRole || ! $villageOfficerRole || ! $guestRole) {
             $this->command->error('Required roles not found!');
+
             return;
         }
 
@@ -82,7 +83,7 @@ class UserSeeder extends Seeder
                     'username' => 'village_officer',
                     'email' => 'officer@desa.go.id',
                     'password' => Hash::make('password'),
-                    'full_name' => 'Perangkat Desa ' . $village->name,
+                    'full_name' => 'Perangkat Desa '.$village->name,
                     'phone_number' => '081234567891',
                     'role_id' => $villageOfficerRole->id,
                     'village_id' => $village->id,
@@ -102,7 +103,7 @@ class UserSeeder extends Seeder
         $this->command->info('==================================');
         $this->command->info('✓ User seeding completed!');
         $this->command->info('==================================');
-        $this->command->info('Total Users: ' . User::count());
-        $this->command->info('Total Roles: ' . UserRole::count());
+        $this->command->info('Total Users: '.User::count());
+        $this->command->info('Total Roles: '.UserRole::count());
     }
 }

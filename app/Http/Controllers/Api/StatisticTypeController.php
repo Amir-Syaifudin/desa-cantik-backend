@@ -22,20 +22,20 @@ class StatisticTypeController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Successful operation', content: new OA\JsonContent(properties: [
                 new OA\Property(property: 'success', type: 'boolean', example: true),
-                new OA\Property(property: 'data', type: 'array', items: new OA\Items()),
+                new OA\Property(property: 'data', type: 'array', items: new OA\Items),
             ])),
         ],
     )]
     public function index(Request $request)
     {
         $category = $request->query('category');
-        $cacheKey = 'statistic_types' . ($category ? "_{$category}" : '_all');
+        $cacheKey = 'statistic_types'.($category ? "_{$category}" : '_all');
         $cacheTTL = 3600; // 1 hour
 
         $types = Cache::remember($cacheKey, $cacheTTL, function () use ($category) {
             return StatisticType::query()
                 ->where('is_active', true)
-                ->when($category, fn($query) => $query->where('category', $category))
+                ->when($category, fn ($query) => $query->where('category', $category))
                 ->orderBy('display_order')
                 ->orderBy('name')
                 ->get();

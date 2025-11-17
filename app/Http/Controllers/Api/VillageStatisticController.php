@@ -41,7 +41,7 @@ class VillageStatisticController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Successful operation', content: new OA\JsonContent(properties: [
                 new OA\Property(property: 'success', type: 'boolean', example: true),
-                new OA\Property(property: 'data', type: 'array', items: new OA\Items()),
+                new OA\Property(property: 'data', type: 'array', items: new OA\Items),
                 new OA\Property(property: 'meta', type: 'object'),
             ])),
         ],
@@ -73,8 +73,8 @@ class VillageStatisticController extends Controller
                 'creator:id,full_name,name',
             ])
             ->where('village_id', $village->id)
-            ->when($request->filled('year'), fn($query) => $query->where('year', $request->query('year')))
-            ->when($request->filled('statistic_type_id'), fn($query) => $query->where('statistic_type_id', $request->query('statistic_type_id')))
+            ->when($request->filled('year'), fn ($query) => $query->where('year', $request->query('year')))
+            ->when($request->filled('statistic_type_id'), fn ($query) => $query->where('statistic_type_id', $request->query('statistic_type_id')))
             ->orderByDesc('year')
             ->orderBy('indicator_name')
             ->paginate($perPage)
@@ -102,7 +102,7 @@ class VillageStatisticController extends Controller
             ->select(['id', 'village_id', 'statistic_type_id', 'indicator_name', 'value', 'unit', 'year'])
             ->with('statisticType:id,name,code,category,description,display_order')
             ->where('village_id', $village->id)
-            ->when($year, fn($query) => $query->where('year', $year))
+            ->when($year, fn ($query) => $query->where('year', $year))
             ->get();
 
         $effectiveYear = $year ?? $statistics->max('year');

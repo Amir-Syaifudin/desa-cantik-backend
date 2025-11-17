@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -251,7 +251,7 @@ class AuthController extends Controller
             $validator = Validator::make($request->all(), [
                 'full_name' => 'nullable|string|max:255',
                 'phone' => 'nullable|string|max:20',
-                'email' => 'nullable|email|unique:users,email,' . $user->id,
+                'email' => 'nullable|email|unique:users,email,'.$user->id,
             ]);
 
             if ($validator->fails()) {

@@ -4,7 +4,6 @@ namespace Tests\Feature\Village;
 
 use App\Models\Village;
 use App\Models\VillageProfile;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class VillageEndpointsTest extends TestCase

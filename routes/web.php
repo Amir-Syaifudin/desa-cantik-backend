@@ -21,6 +21,7 @@ Route::get('/api/documentation/json', function () {
     if (! file_exists($path)) {
         abort(404, 'API documentation not generated yet. Run php artisan openapi:generate');
     }
+
     return response()->file($path, ['Content-Type' => 'application/json']);
 });
 
@@ -29,5 +30,6 @@ Route::get('/api/documentation/yaml', function () {
     if (! file_exists($path)) {
         abort(404, 'API documentation not generated yet. Run php artisan openapi:generate');
     }
+
     return response()->file($path, ['Content-Type' => 'application/yaml']);
 });

@@ -14,8 +14,8 @@ use App\Http\Controllers\Api\VillageModuleController;
 use App\Http\Controllers\Api\VillageProfileController;
 use App\Http\Controllers\Api\VillageStatisticController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     // ===============================================
@@ -152,7 +152,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // OpenAPI docs JSON endpoint (generates docs on demand if not present)
 Route::get('/documentation/json', function () {
     $jsonPath = storage_path('api-docs/api-docs.json');
-    if (!file_exists($jsonPath)) {
+    if (! file_exists($jsonPath)) {
         Artisan::call('openapi:generate');
     }
 
