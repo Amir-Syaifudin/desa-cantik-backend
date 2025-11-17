@@ -102,7 +102,7 @@ class UserSeeder extends Seeder
         $this->command->info('==================================');
         $this->command->info('✓ User seeding completed!');
         $this->command->info('==================================');
-        $this->command->info('Total Users: '.User::count());
-        $this->command->info('Total Roles: '.UserRole::count());
+        $this->command->info('Total Users: ' . User::count());
+        $this->command->info('Total Roles: ' . UserRole::count());
     }
 }

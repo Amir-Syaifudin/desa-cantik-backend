@@ -15,26 +15,27 @@ class GenerateOpenApi extends Command
     {
         $this->info('Scanning for OpenAPI attributes...');
 
-        // Use config paths from l5-swagger if present, otherwise default
-        $annotations = config('l5-swagger.documentations.default.paths.annotations', [base_path('app/Http/Controllers')]);
+        // Use config paths from config/swagger.php
+        $scanPaths = config('swagger.scan.paths', [base_path('app/Http/Controllers/Api'), base_path('app/Docs')]);
+        $scanExclude = config('swagger.scan.exclude', []);
 
-        $analysis = Generator::scan($annotations);
+        $analysis = Generator::scan($scanPaths, ['exclude' => $scanExclude]);
 
         $json = $analysis->toJson();
 
-        $docsPath = storage_path('api-docs');
+        $docsPath = config('swagger.output.dir', storage_path('api-docs'));
         if (!File::exists($docsPath)) {
             File::makeDirectory($docsPath, 0755, true);
         }
 
-        File::put($docsPath . '/api-docs.json', $json);
+        File::put(config('swagger.output.json', $docsPath . '/api-docs.json'), $json);
         $this->info('Generated: ' . $docsPath . '/api-docs.json');
 
         if ($this->option('yaml')) {
             try {
                 $yaml = $analysis->toYaml();
-                File::put($docsPath . '/api-docs.yaml', $yaml);
-                $this->info('Generated: ' . $docsPath . '/api-docs.yaml');
+                File::put(config('swagger.output.yaml', $docsPath . '/api-docs.yaml'), $yaml);
+                $this->info('Generated: ' . config('swagger.output.yaml'));
             } catch (\Throwable $e) {
                 $this->error('Failed to generate YAML: ' . $e->getMessage());
             }

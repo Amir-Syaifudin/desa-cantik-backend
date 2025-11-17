@@ -55,7 +55,7 @@ class VillageController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => collect($villages->items())->map(fn (Village $village) => $this->mapVillageToFrontendPayload($village))->values(),
+            'data' => collect($villages->items())->map(fn(Village $village) => $this->mapVillageToFrontendPayload($village))->values(),
             'meta' => [
                 'current_page' => $villages->currentPage(),
                 'per_page' => $villages->perPage(),
@@ -170,7 +170,7 @@ class VillageController extends Controller
         if ($request->has('district')) $village->kecamatan = $request->district;
         if ($request->has('subdistrict')) $village->kabupaten = $request->subdistrict;
         if ($request->has('province')) $village->provinsi = $request->province;
-        
+
 
         $village->save();
 

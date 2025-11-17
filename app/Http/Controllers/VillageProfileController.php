@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Village;
 use Illuminate\Http\Request;
-use OpenApi\Attributes as OA;
 
 class VillageProfileController extends Controller
 {

@@ -6,87 +6,32 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 
 class ActivityLogController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/v1/activity-logs",
-     *     tags={"Activity Logs"},
-     *     summary="Get activity logs",
-     *     description="Retrieve paginated activity logs (BPS Admin only)",
-     *     security={{"sanctum": {}}},
-     *
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         description="Page number",
-     *
-     *         @OA\Schema(type="integer", default=1)
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         description="Items per page",
-     *
-     *         @OA\Schema(type="integer", default=15, maximum=100)
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="user_id",
-     *         in="query",
-     *         description="Filter by user ID",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="village_id",
-     *         in="query",
-     *         description="Filter by village ID",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="action",
-     *         in="query",
-     *         description="Filter by action type (create, update, delete)",
-     *
-     *         @OA\Schema(type="string")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="model_type",
-     *         in="query",
-     *         description="Filter by model type",
-     *
-     *         @OA\Schema(type="string")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="from_date",
-     *         in="query",
-     *         description="Filter from date (Y-m-d H:i:s)",
-     *
-     *         @OA\Schema(type="string", format="date-time")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="to_date",
-     *         in="query",
-     *         description="Filter to date (Y-m-d H:i:s)",
-     *
-     *         @OA\Schema(type="string", format="date-time")
-     *     ),
-     *
-     *     @OA\Response(response=200, description="Success"),
-     *     @OA\Response(response=401, description="Unauthenticated"),
-     *     @OA\Response(response=403, description="Forbidden")
-     * )
-     */
+    #[OA\Get(
+        path: '/api/v1/activity-logs',
+        tags: ['Activity Logs'],
+        summary: 'Get activity logs',
+        description: 'Retrieve paginated activity logs (BPS Admin only)',
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'page', in: 'query', description: 'Page number', schema: new OA\Schema(type: 'integer', default: 1)),
+            new OA\Parameter(name: 'per_page', in: 'query', description: 'Items per page', schema: new OA\Schema(type: 'integer', default: 15, maximum: 100)),
+            new OA\Parameter(name: 'user_id', in: 'query', description: 'Filter by user ID', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'village_id', in: 'query', description: 'Filter by village ID', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'action', in: 'query', description: 'Filter by action type (create, update, delete)', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'model_type', in: 'query', description: 'Filter by model type', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'from_date', in: 'query', description: 'Filter from date (Y-m-d H:i:s)', schema: new OA\Schema(type: 'string', format: 'date-time')),
+            new OA\Parameter(name: 'to_date', in: 'query', description: 'Filter to date (Y-m-d H:i:s)', schema: new OA\Schema(type: 'string', format: 'date-time')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Success'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+        ],
+    )]
     public function index(Request $request): JsonResponse
     {
         $perPage = min((int) $request->query('per_page', 15), 100);
@@ -122,7 +67,7 @@ class ActivityLogController extends Controller
         }
 
         if ($request->filled('model_type')) {
-            $query->where('model_type', 'LIKE', '%'.$request->query('model_type').'%');
+            $query->where('model_type', 'LIKE', '%' . $request->query('model_type') . '%');
         }
 
         // Support both spec's date_from/date_to and legacy from_date/to_date
@@ -150,27 +95,20 @@ class ActivityLogController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/activity-logs/{id}",
-     *     tags={"Activity Logs"},
-     *     summary="Get activity log detail",
-     *     description="Get detailed information about a specific activity log (BPS Admin only)",
-     *     security={{"sanctum": {}}},
-     *
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Activity Log ID",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Response(response=200, description="Success"),
-     *     @OA\Response(response=404, description="Log not found")
-     * )
-     */
+    #[OA\Get(
+        path: '/api/v1/activity-logs/{id}',
+        tags: ['Activity Logs'],
+        summary: 'Get activity log detail',
+        description: 'Get detailed information about a specific activity log (BPS Admin only)',
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, description: 'Activity Log ID', schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Success'),
+            new OA\Response(response: 404, description: 'Log not found'),
+        ],
+    )]
     public function show($id): JsonResponse
     {
         $log = ActivityLog::with(['user:id,username,full_name,email', 'village:id,name,code,district'])
@@ -225,7 +163,7 @@ class ActivityLogController extends Controller
             $query->where('action', $request->query('action'));
         }
         if ($request->filled('model_type')) {
-            $query->where('model_type', 'LIKE', '%'.$request->query('model_type').'%');
+            $query->where('model_type', 'LIKE', '%' . $request->query('model_type') . '%');
         }
         if ($request->filled('date_from') || $request->filled('from_date')) {
             $dateFrom = $request->query('date_from') ?? $request->query('from_date');
@@ -238,7 +176,7 @@ class ActivityLogController extends Controller
 
         $logs = $query->orderBy('created_at', 'desc')->get();
 
-        $filename = 'activity-logs-'.date('Y-m-d-His').'.csv';
+        $filename = 'activity-logs-' . date('Y-m-d-His') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename={$filename}",

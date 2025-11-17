@@ -185,26 +185,20 @@ class UserController extends Controller
         ], 201);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/v1/users/{id}",
-     *     tags={"Users"},
-     *     summary="Update user",
-     *     description="Update user information (BPS Admin only)",
-     *     security={{"sanctum": {}}},
-     *
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Response(response=200, description="User updated successfully"),
-     *     @OA\Response(response=404, description="User not found")
-     * )
-     */
+    #[OA\Put(
+        path: '/api/v1/users/{id}',
+        tags: ['Users'],
+        summary: 'Update user',
+        description: 'Update user information (BPS Admin only)',
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'User updated successfully'),
+            new OA\Response(response: 404, description: 'User not found'),
+        ],
+    )]
     public function update(Request $request, $id): JsonResponse
     {
         $user = User::findOrFail($id);
@@ -284,27 +278,21 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Delete(
-     *     path="/api/v1/users/{id}",
-     *     tags={"Users"},
-     *     summary="Delete user",
-     *     description="Delete a user account (BPS Admin only, cannot delete self)",
-     *     security={{"sanctum": {}}},
-     *
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Response(response=200, description="User deleted successfully"),
-     *     @OA\Response(response=403, description="Cannot delete own account"),
-     *     @OA\Response(response=404, description="User not found")
-     * )
-     */
+    #[OA\Delete(
+        path: '/api/v1/users/{id}',
+        tags: ['Users'],
+        summary: 'Delete user',
+        description: 'Delete a user account (BPS Admin only, cannot delete self)',
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'User deleted successfully'),
+            new OA\Response(response: 403, description: 'Cannot delete own account'),
+            new OA\Response(response: 404, description: 'User not found'),
+        ],
+    )]
     public function destroy(Request $request, $id): JsonResponse
     {
         $user = User::findOrFail($id);

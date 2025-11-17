@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Village;
-use OpenApi\Attributes as OA;
 
 class VillageModuleController extends Controller
 {
