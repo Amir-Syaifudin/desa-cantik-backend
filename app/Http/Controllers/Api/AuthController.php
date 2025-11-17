@@ -131,9 +131,10 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
-            // Accept ONLY 'username' field per spec
+            // Accept either 'login' (email/username) or 'username' for frontend compatibility
             $validator = Validator::make($request->all(), [
-                'username' => 'required|string',
+                'login' => 'required_without:username|string',
+                'username' => 'required_without:login|string',
                 'password' => 'required|string',
             ]);
 
@@ -145,9 +146,11 @@ class AuthController extends Controller
                 ], 422);
             }
 
+            $loginField = $request->input('login') ?? $request->input('username');
+
             // Find user by email OR username
-            $user = User::where('email', $request->username)
-                ->orWhere('username', $request->username)
+            $user = User::where('email', $loginField)
+                ->orWhere('username', $loginField)
                 ->first();
 
             if (!$user || !Hash::check($request->password, $user->password)) {
@@ -183,7 +186,7 @@ class AuthController extends Controller
                         'village' => $user->village ? [
                             'id' => $user->village->id,
                             'name' => $user->village->name,
-                            'kode' => $user->village->kode,
+                            'kode' => $user->village->village_code,
                         ] : null,
                     ],
                     'token' => $token,
