@@ -130,7 +130,7 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'full_name' => 'required|string|max:255',
             'role' => ['required', Rule::in([UserRole::BPS_ADMIN, UserRole::VILLAGE_OFFICER])],
-            'village_id' => 'required_if:role,'.UserRole::VILLAGE_OFFICER.'|nullable|exists:villages,id',
+            'village_id' => 'required_if:role,' . UserRole::VILLAGE_OFFICER . '|nullable|exists:villages,id',
             'phone' => 'nullable|string|max:20',
         ]);
 
@@ -203,8 +203,8 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'username' => 'sometimes|string|max:100|unique:users,username,'.$id,
-            'email' => 'sometimes|email|max:255|unique:users,email,'.$id,
+            'username' => 'sometimes|string|max:100|unique:users,username,' . $id,
+            'email' => 'sometimes|email|max:255|unique:users,email,' . $id,
             'full_name' => 'sometimes|string|max:255',
             'role' => ['sometimes', Rule::in([UserRole::BPS_ADMIN, UserRole::VILLAGE_OFFICER])],
             'village_id' => 'sometimes|nullable|exists:villages,id',
@@ -313,6 +313,77 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User deleted successfully',
+        ]);
+    }
+
+    #[OA\Put(
+        path: '/api/v1/users/{id}/reset-password',
+        tags: ['Users'],
+        summary: 'Reset user password (Admin only)',
+        description: 'Reset a user password without requiring old password (BPS Admin only)',
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['password'],
+                properties: [
+                    new OA\Property(property: 'password', type: 'string', minLength: 8, description: 'New password'),
+                    new OA\Property(property: 'password_confirmation', type: 'string', description: 'Password confirmation'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Password reset successfully'),
+            new OA\Response(response: 403, description: 'Cannot reset own password'),
+            new OA\Response(response: 404, description: 'User not found'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ],
+    )]
+    public function resetPassword(Request $request, $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+
+        // Prevent resetting own password (use updatePassword endpoint instead)
+        if ($user->id === $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot reset your own password. Use the update password endpoint instead.',
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $oldData = ['username' => $user->username, 'email' => $user->email];
+
+        // Update password
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Revoke all tokens for this user (force re-login)
+        $user->tokens()->delete();
+
+        ActivityLogger::log('update', $user, "Password reset by admin for user: {$user->username}", [
+            'admin_id' => $request->user()->id,
+            'user_id' => $user->id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset successfully. User must login again.',
         ]);
     }
 }

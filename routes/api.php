@@ -86,6 +86,7 @@ Route::prefix('v1')->group(function () {
             Route::get('users/{id}', [UserController::class, 'show']);
             Route::post('users', [UserController::class, 'store']);
             Route::put('users/{id}', [UserController::class, 'update']);
+            Route::put('users/{id}/reset-password', [UserController::class, 'resetPassword']);
             Route::delete('users/{id}', [UserController::class, 'destroy']);
 
             // Activity Logs (BPS Admin only)
