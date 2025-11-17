@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
             StatisticTypeSeeder::class,
             UserSeeder::class,
         ]);
-        
+
         $this->command->newLine();
         $this->command->info('Database seeding completed!');
         $this->command->newLine();

@@ -18,7 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class VillageStatisticController extends Controller
@@ -27,48 +27,25 @@ class VillageStatisticController extends Controller
         private VillageStatisticService $service,
     ) {}
 
-    /**
-     * @OA\Get(
-     *     path="/villages/{village}/statistics",
-     *     summary="List village statistics",
-     *     description="Get paginated list of village statistics with optional filters",
-     *     tags={"Village Statistics"},
-     *     @OA\Parameter(
-     *         name="village",
-     *         in="path",
-     *         required=true,
-     *         description="Village ID",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="year",
-     *         in="query",
-     *         description="Filter by year",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="statistic_type_id",
-     *         in="query",
-     *         description="Filter by statistic type",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         description="Items per page (max 100)",
-     *         @OA\Schema(type="integer", default=15)
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="data", type="array", @OA\Items()),
-     *             @OA\Property(property="meta", type="object")
-     *         )
-     *     )
-     * )
-     */
+    #[OA\Get(
+        path: '/api/v1/villages/{village}/statistics',
+        summary: 'List village statistics',
+        description: 'Get paginated list of village statistics with optional filters',
+        tags: ['Village Statistics'],
+        parameters: [
+            new OA\Parameter(name: 'village', in: 'path', required: true, description: 'Village ID', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'year', in: 'query', description: 'Filter by year', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'statistic_type_id', in: 'query', description: 'Filter by statistic type', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'per_page', in: 'query', description: 'Items per page (max 100)', schema: new OA\Schema(type: 'integer', default: 15)),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Successful operation', content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'success', type: 'boolean', example: true),
+                new OA\Property(property: 'data', type: 'array', items: new OA\Items()),
+                new OA\Property(property: 'meta', type: 'object'),
+            ])),
+        ],
+    )]
     public function index(Request $request, Village $village): JsonResponse
     {
         $perPage = (int) $request->query('per_page', 15);
@@ -89,11 +66,11 @@ class VillageStatisticController extends Controller
                 'created_by',
                 'updated_by',
                 'created_at',
-                'updated_at'
+                'updated_at',
             ])
             ->with([
                 'statisticType:id,name,code,category,description,display_order',
-                'creator:id,full_name,name'
+                'creator:id,full_name,name',
             ])
             ->where('village_id', $village->id)
             ->when($request->filled('year'), fn($query) => $query->where('year', $request->query('year')))
@@ -178,7 +155,7 @@ class VillageStatisticController extends Controller
 
         $statistic->load([
             'statisticType:id,name,code,category,description,display_order',
-            'creator:id,full_name,name'
+            'creator:id,full_name,name',
         ]);
 
         ActivityLogger::log(
@@ -210,7 +187,7 @@ class VillageStatisticController extends Controller
         $statistic->load([
             'statisticType:id,name,code,category,description,display_order',
             'creator:id,full_name,name',
-            'updater:id,full_name,name'
+            'updater:id,full_name,name',
         ]);
 
         ActivityLogger::log(
@@ -309,7 +286,7 @@ class VillageStatisticController extends Controller
             return;
         }
 
-        throw new VillageAccessDeniedException();
+        throw new VillageAccessDeniedException;
     }
 
     protected function findStatisticOrFail(Village $village, int $statisticId): VillageStatistic

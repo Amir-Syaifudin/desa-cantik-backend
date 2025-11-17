@@ -33,7 +33,7 @@ class StoreVillageStatisticRequest extends FormRequest
             'indicator_name' => ['required', 'string', 'max:255'],
             'value' => ['required', 'numeric'],
             'unit' => ['nullable', 'string', 'max:50'],
-            'year' => ['required', 'integer', 'min:2000', 'max:' . $maxYear],
+            'year' => ['required', 'integer', 'min:2000', 'max:'.$maxYear],
             'period' => ['nullable', 'string', 'max:50'],
             'source' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],

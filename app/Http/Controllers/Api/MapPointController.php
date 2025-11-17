@@ -10,7 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use OpenApi\Annotations as OA;
 
 class MapPointController extends Controller
 {
@@ -28,7 +27,7 @@ class MapPointController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $map->desa_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to add points to this thematic map'
+                'message' => 'You do not have permission to add points to this thematic map',
             ], 403);
         }
 
@@ -46,7 +45,7 @@ class MapPointController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -78,7 +77,7 @@ class MapPointController extends Controller
                 'longitude' => $point->longitude,
                 'image_url' => $point->icon_url,
                 'additional_info' => $point->metadata,
-            ]
+            ],
         ], 201);
     }
 
@@ -97,7 +96,7 @@ class MapPointController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $map->desa_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to update this map point'
+                'message' => 'You do not have permission to update this map point',
             ], 403);
         }
 
@@ -115,19 +114,33 @@ class MapPointController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $oldData = $point->toArray();
 
-        if ($request->has('name')) $point->name = $request->name;
-        if ($request->has('description')) $point->description = $request->description;
-        if ($request->has('category')) $point->category = $request->category;
-        if ($request->has('latitude')) $point->latitude = $request->latitude;
-        if ($request->has('longitude')) $point->longitude = $request->longitude;
-        if ($request->has('image_url')) $point->icon_url = $request->image_url;
-        if ($request->has('additional_info')) $point->metadata = $request->additional_info;
+        if ($request->has('name')) {
+            $point->name = $request->name;
+        }
+        if ($request->has('description')) {
+            $point->description = $request->description;
+        }
+        if ($request->has('category')) {
+            $point->category = $request->category;
+        }
+        if ($request->has('latitude')) {
+            $point->latitude = $request->latitude;
+        }
+        if ($request->has('longitude')) {
+            $point->longitude = $request->longitude;
+        }
+        if ($request->has('image_url')) {
+            $point->icon_url = $request->image_url;
+        }
+        if ($request->has('additional_info')) {
+            $point->metadata = $request->additional_info;
+        }
 
         $point->save();
 
@@ -150,7 +163,7 @@ class MapPointController extends Controller
                 'longitude' => $point->longitude,
                 'image_url' => $point->icon_url,
                 'additional_info' => $point->metadata,
-            ]
+            ],
         ]);
     }
 
@@ -169,7 +182,7 @@ class MapPointController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $map->desa_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to delete this map point'
+                'message' => 'You do not have permission to delete this map point',
             ], 403);
         }
 
@@ -182,7 +195,7 @@ class MapPointController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Map point deleted successfully'
+            'message' => 'Map point deleted successfully',
         ]);
     }
 
@@ -201,7 +214,7 @@ class MapPointController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $map->desa_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to update this map point'
+                'message' => 'You do not have permission to update this map point',
             ], 403);
         }
 
@@ -213,7 +226,7 @@ class MapPointController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -236,7 +249,7 @@ class MapPointController extends Controller
             'message' => 'Image uploaded successfully',
             'data' => [
                 'image_url' => $point->icon_url,
-            ]
+            ],
         ]);
     }
 }

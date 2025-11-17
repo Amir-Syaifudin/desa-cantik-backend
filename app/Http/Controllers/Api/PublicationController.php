@@ -33,7 +33,7 @@ class PublicationController extends Controller
         $publications = Publication::query()
             ->with(['uploader:id,full_name', 'village:id,name,village_code'])
             ->where('desa_id', $village->id)
-            ->when($year, fn($query) => $query->whereYear('published_at', $year))
+            ->when($year, fn ($query) => $query->whereYear('published_at', $year))
             ->orderByDesc('published_at')
             ->paginate($perPage)
             ->appends($request->query());
@@ -193,7 +193,7 @@ class PublicationController extends Controller
 
         return Storage::disk('public')->download(
             $publication->file_path,
-            $publication->file_name ?? 'publication_' . $publication->id,
+            $publication->file_name ?? 'publication_'.$publication->id,
             [
                 'Content-Type' => $mimeType,
             ]

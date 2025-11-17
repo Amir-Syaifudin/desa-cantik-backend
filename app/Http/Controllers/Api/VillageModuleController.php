@@ -9,7 +9,6 @@ use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use OpenApi\Annotations as OA;
 
 class VillageModuleController extends Controller
 {
@@ -35,7 +34,7 @@ class VillageModuleController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $modules
+            'data' => $modules,
         ]);
     }
 
@@ -54,7 +53,7 @@ class VillageModuleController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -81,7 +80,7 @@ class VillageModuleController extends Controller
                 'village_id' => $module->village_id,
                 'module_name' => $module->name,
                 'is_enabled' => $module->status === 'active',
-            ]
+            ],
         ]);
     }
 }

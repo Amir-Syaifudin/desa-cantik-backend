@@ -165,7 +165,7 @@ class DashboardStatisticsTest extends TestCase
         VillageProfile::factory()->for($village, 'village')->create();
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->getJson('/api/v1/dashboard/village?village_id=' . $village->id);
+            ->getJson('/api/v1/dashboard/village?village_id='.$village->id);
 
         $response->assertOk()
             ->assertJsonPath('data.village.id', $village->id);
@@ -193,7 +193,7 @@ class DashboardStatisticsTest extends TestCase
 
         // Officer tries to access other village - should still get their own village
         $response = $this->actingAs($officer, 'sanctum')
-            ->getJson('/api/v1/dashboard/village?village_id=' . $otherVillage->id);
+            ->getJson('/api/v1/dashboard/village?village_id='.$otherVillage->id);
 
         $response->assertOk()
             ->assertJsonPath('data.village.id', $officer->village_id);

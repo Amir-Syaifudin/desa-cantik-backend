@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\ThematicMap;
 use App\Models\Village; // Pastikan untuk menggunakan model Village jika diperlukan
-use App\Models\ThematicMap; // Pastikan model thematic map ada
+use Illuminate\Http\Request; // Pastikan model thematic map ada
 
 class ThematicMapsController extends Controller
 {
@@ -19,7 +20,7 @@ class ThematicMapsController extends Controller
             ->withCount('mapPoints')
             ->orderByDesc('created_at')
             ->get()
-            ->map(fn($map) => $this->formatThematicMap($map));
+            ->map(fn ($map) => $this->formatThematicMap($map));
 
         return response()->json([
             'success' => true,

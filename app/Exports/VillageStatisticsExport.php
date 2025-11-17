@@ -11,12 +11,11 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 class VillageStatisticsExport implements FromCollection, WithHeadings, WithMapping
 {
     /**
-     * @param Collection<int, VillageStatistic> $statistics
+     * @param  Collection<int, VillageStatistic>  $statistics
      */
     public function __construct(
         protected Collection $statistics,
-    ) {
-    }
+    ) {}
 
     public function collection(): Collection
     {
@@ -38,7 +37,7 @@ class VillageStatisticsExport implements FromCollection, WithHeadings, WithMappi
     }
 
     /**
-     * @param VillageStatistic $statistic
+     * @param  VillageStatistic  $statistic
      */
     public function map($statistic): array
     {

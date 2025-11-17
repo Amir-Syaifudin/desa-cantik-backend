@@ -17,7 +17,7 @@ class DashboardController extends Controller
 
     /**
      * Get BPS Admin Dashboard Statistics
-     * 
+     *
      * @throws DashboardAccessDeniedException
      */
     public function admin(Request $request): JsonResponse
@@ -32,7 +32,7 @@ class DashboardController extends Controller
 
     /**
      * Get Village Officer Dashboard Statistics
-     * 
+     *
      * @throws DashboardAccessDeniedException
      * @throws InvalidDashboardRequestException
      */
@@ -48,7 +48,7 @@ class DashboardController extends Controller
 
         if (! $villageId) {
             throw new InvalidDashboardRequestException(
-                'Village ID is required. Village officers can only view their assigned village, ' .
+                'Village ID is required. Village officers can only view their assigned village, '.
                     'while BPS administrators must specify a village_id parameter.'
             );
         }
@@ -74,7 +74,7 @@ class DashboardController extends Controller
 
     /**
      * Authorize user has one of the specified roles
-     * 
+     *
      * @throws DashboardAccessDeniedException
      */
     protected function authorizeRole(string ...$roles): void

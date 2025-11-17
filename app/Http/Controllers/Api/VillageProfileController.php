@@ -10,33 +10,25 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 
 class VillageProfileController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/v1/villages/{village_id}/profile",
-     *     tags={"Village Profile"},
-     *     summary="Get village profile (Public)",
-     *     @OA\Parameter(
-     *         name="village_id",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(response=200, description="Success"),
-     *     @OA\Response(response=404, description="Village not found")
-     * )
-     */
+    #[OA\Get(
+        path: '/api/v1/villages/{village_id}/profile',
+        tags: ['Village Profile'],
+        summary: 'Get village profile (Public)',
+        parameters: [new OA\Parameter(name: 'village_id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [new OA\Response(response: 200, description: 'Success'), new OA\Response(response: 404, description: 'Village not found')]
+    )]
     public function show($villageId): JsonResponse
     {
         $village = Village::with('profile')->findOrFail($villageId);
 
-        if (!$village->profile) {
+        if (! $village->profile) {
             return response()->json([
                 'success' => false,
-                'message' => 'Village profile not found'
+                'message' => 'Village profile not found',
             ], 404);
         }
 
@@ -60,21 +52,19 @@ class VillageProfileController extends Controller
                 'logo_url' => $profile->logo_url,
                 'created_at' => $profile->created_at,
                 'updated_at' => $profile->updated_at,
-            ]
+            ],
         ]);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/v1/villages/{village_id}/profile",
-     *     tags={"Village Profile"},
-     *     summary="Update village profile",
-     *     description="Update village profile (BPS Admin or Village Officer for own village)",
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Profile updated"),
-     *     @OA\Response(response=403, description="Forbidden")
-     * )
-     */
+    #[OA\Put(
+        path: '/api/v1/villages/{village_id}/profile',
+        tags: ['Village Profile'],
+        summary: 'Update village profile',
+        description: 'Update village profile (BPS Admin or Village Officer for own village)',
+        security: [['sanctum' => []]],
+        parameters: [new OA\Parameter(name: 'village_id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [new OA\Response(response: 200, description: 'Profile updated'), new OA\Response(response: 403, description: 'Forbidden')]
+    )]
     public function update(Request $request, $villageId): JsonResponse
     {
         $village = Village::findOrFail($villageId);
@@ -86,7 +76,7 @@ class VillageProfileController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $village->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to update this village profile'
+                'message' => 'You do not have permission to update this village profile',
             ], 403);
         }
 
@@ -107,29 +97,49 @@ class VillageProfileController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         // Get or create profile
         $profile = $village->profile;
-        if (!$profile) {
+        if (! $profile) {
             $profile = new VillageProfile(['village_id' => $village->id]);
         }
 
         $oldData = $profile->toArray();
 
         // Map spec fields to model fields
-        if ($request->has('description')) $profile->deskripsi = $request->description;
-        if ($request->has('vision')) $profile->visi = $request->vision;
-        if ($request->has('mission')) $profile->misi = json_encode($request->mission);
-        if ($request->has('area')) $profile->area = $request->area;
-        if ($request->has('population')) $profile->population = $request->population;
-        if ($request->has('address')) $profile->address = $request->address;
-        if ($request->has('phone')) $profile->phone = $request->phone;
-        if ($request->has('email')) $profile->email = $request->email;
-        if ($request->has('website')) $profile->website = $request->website;
-        if ($request->has('logo_url')) $profile->logo_url = $request->logo_url;
+        if ($request->has('description')) {
+            $profile->deskripsi = $request->description;
+        }
+        if ($request->has('vision')) {
+            $profile->visi = $request->vision;
+        }
+        if ($request->has('mission')) {
+            $profile->misi = json_encode($request->mission);
+        }
+        if ($request->has('area')) {
+            $profile->area = $request->area;
+        }
+        if ($request->has('population')) {
+            $profile->population = $request->population;
+        }
+        if ($request->has('address')) {
+            $profile->address = $request->address;
+        }
+        if ($request->has('phone')) {
+            $profile->phone = $request->phone;
+        }
+        if ($request->has('email')) {
+            $profile->email = $request->email;
+        }
+        if ($request->has('website')) {
+            $profile->website = $request->website;
+        }
+        if ($request->has('logo_url')) {
+            $profile->logo_url = $request->logo_url;
+        }
 
         $profile->updated_by = $user->id;
 
@@ -162,20 +172,18 @@ class VillageProfileController extends Controller
                 'email' => $profile->email,
                 'website' => $profile->website,
                 'logo_url' => $profile->logo_url,
-            ]
+            ],
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/villages/{village_id}/profile/logo",
-     *     tags={"Village Profile"},
-     *     summary="Upload village logo",
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Logo uploaded"),
-     *     @OA\Response(response=422, description="Validation error")
-     * )
-     */
+    #[OA\Post(
+        path: '/api/v1/villages/{village_id}/profile/logo',
+        tags: ['Village Profile'],
+        summary: 'Upload village logo',
+        security: [['sanctum' => []]],
+        parameters: [new OA\Parameter(name: 'village_id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [new OA\Response(response: 200, description: 'Logo uploaded'), new OA\Response(response: 422, description: 'Validation error')]
+    )]
     public function uploadLogo(Request $request, $villageId): JsonResponse
     {
         $village = Village::findOrFail($villageId);
@@ -187,7 +195,7 @@ class VillageProfileController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $village->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to update this village profile'
+                'message' => 'You do not have permission to update this village profile',
             ], 403);
         }
 
@@ -199,12 +207,12 @@ class VillageProfileController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $profile = $village->profile;
-        if (!$profile) {
+        if (! $profile) {
             $profile = VillageProfile::create(['village_id' => $village->id]);
         }
 
@@ -226,7 +234,7 @@ class VillageProfileController extends Controller
             'message' => 'Logo uploaded successfully',
             'data' => [
                 'logo_url' => $profile->logo_url,
-            ]
+            ],
         ]);
     }
 }

@@ -14,6 +14,7 @@ class CheckRole
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      * @param  string  ...$roles  Allowed role names
+     *
      * @throws DashboardAccessDeniedException
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response

@@ -8,44 +8,24 @@ use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class VillageController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/v1/villages",
-     *     tags={"Villages"},
-     *     summary="Get all villages (Public)",
-     *     description="Retrieve paginated list of villages with optional filters",
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         description="Page number",
-     *         @OA\Schema(type="integer", default=1)
-     *     ),
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         description="Items per page",
-     *         @OA\Schema(type="integer", default=15, maximum=100)
-     *     ),
-     *     @OA\Parameter(
-     *         name="search",
-     *         in="query",
-     *         description="Search by name or district",
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="is_active",
-     *         in="query",
-     *         description="Filter by active status",
-     *         @OA\Schema(type="boolean", default=true)
-     *     ),
-     *     @OA\Response(response=200, description="Success")
-     * )
-     */
+    #[OA\Get(
+        path: '/api/v1/villages',
+        tags: ['Villages'],
+        summary: 'Get all villages (Public)',
+        description: 'Retrieve paginated list of villages with optional filters',
+        parameters: [
+            new OA\Parameter(name: 'page', in: 'query', description: 'Page number', schema: new OA\Schema(type: 'integer', default: 1)),
+            new OA\Parameter(name: 'per_page', in: 'query', description: 'Items per page', schema: new OA\Schema(type: 'integer', default: 15, maximum: 100)),
+            new OA\Parameter(name: 'search', in: 'query', description: 'Search by name or district', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'is_active', in: 'query', description: 'Filter by active status', schema: new OA\Schema(type: 'boolean', default: true)),
+        ],
+        responses: [new OA\Response(response: 200, description: 'Success')]
+    )]
     public function index(Request $request): JsonResponse
     {
         $perPage = min((int) $request->query('per_page', 15), 100);
@@ -81,25 +61,17 @@ class VillageController extends Controller
                 'per_page' => $villages->perPage(),
                 'total' => $villages->total(),
                 'last_page' => $villages->lastPage(),
-            ]
+            ],
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/villages/{id}",
-     *     tags={"Villages"},
-     *     summary="Get village detail (Public)",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(response=200, description="Success"),
-     *     @OA\Response(response=404, description="Village not found")
-     * )
-     */
+    #[OA\Get(
+        path: '/api/v1/villages/{id}',
+        tags: ['Villages'],
+        summary: 'Get village detail (Public)',
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [new OA\Response(response: 200, description: 'Success'), new OA\Response(response: 404, description: 'Village not found')]
+    )]
     public function show($id): JsonResponse
     {
         $village = Village::with([
@@ -112,16 +84,13 @@ class VillageController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/villages",
-     *     tags={"Villages"},
-     *     summary="Create village (BPS Admin only)",
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(response=201, description="Village created"),
-     *     @OA\Response(response=422, description="Validation error")
-     * )
-     */
+    #[OA\Post(
+        path: '/api/v1/villages',
+        tags: ['Villages'],
+        summary: 'Create village (BPS Admin only)',
+        security: [['sanctum' => []]],
+        responses: [new OA\Response(response: 201, description: 'Village created'), new OA\Response(response: 422, description: 'Validation error')]
+    )]
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -136,7 +105,7 @@ class VillageController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -156,26 +125,24 @@ class VillageController extends Controller
             'message' => 'Village created successfully',
             'data' => [
                 'id' => $village->id,
-                'code' => $village->code,
+                'code' => $village->village_code,
                 'name' => $village->name,
                 'district' => $village->district,
                 'subdistrict' => $village->subdistrict,
-                'is_active' => $village->is_active,
+                'is_active' => $village->is_visible,
                 'display_order' => $village->display_order,
-            ]
+            ],
         ], 201);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/v1/villages/{id}",
-     *     tags={"Villages"},
-     *     summary="Update village (BPS Admin only)",
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Village updated"),
-     *     @OA\Response(response=404, description="Village not found")
-     * )
-     */
+    #[OA\Put(
+        path: '/api/v1/villages/{id}',
+        tags: ['Villages'],
+        summary: 'Update village (BPS Admin only)',
+        security: [['sanctum' => []]],
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [new OA\Response(response: 200, description: 'Village updated'), new OA\Response(response: 404, description: 'Village not found')]
+    )]
     public function update(Request $request, $id): JsonResponse
     {
         $village = Village::findOrFail($id);
@@ -192,7 +159,7 @@ class VillageController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -203,6 +170,7 @@ class VillageController extends Controller
         if ($request->has('district')) $village->kecamatan = $request->district;
         if ($request->has('subdistrict')) $village->kabupaten = $request->subdistrict;
         if ($request->has('province')) $village->provinsi = $request->province;
+        
 
         $village->save();
 
@@ -216,26 +184,24 @@ class VillageController extends Controller
             'message' => 'Village updated successfully',
             'data' => [
                 'id' => $village->id,
-                'code' => $village->code,
+                'code' => $village->village_code,
                 'name' => $village->name,
                 'district' => $village->district,
                 'subdistrict' => $village->subdistrict,
-                'is_active' => $village->is_active,
+                'is_active' => $village->is_visible,
                 'display_order' => $village->display_order,
-            ]
+            ],
         ]);
     }
 
-    /**
-     * @OA\Delete(
-     *     path="/api/v1/villages/{id}",
-     *     tags={"Villages"},
-     *     summary="Delete village (BPS Admin only)",
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Village deleted"),
-     *     @OA\Response(response=404, description="Village not found")
-     * )
-     */
+    #[OA\Delete(
+        path: '/api/v1/villages/{id}',
+        tags: ['Villages'],
+        summary: 'Delete village (BPS Admin only)',
+        security: [['sanctum' => []]],
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [new OA\Response(response: 200, description: 'Village deleted'), new OA\Response(response: 404, description: 'Village not found')]
+    )]
     public function destroy($id): JsonResponse
     {
         $village = Village::findOrFail($id);
@@ -244,7 +210,7 @@ class VillageController extends Controller
         if ($village->users()->count() > 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cannot delete village with associated users'
+                'message' => 'Cannot delete village with associated users',
             ], 422);
         }
 
@@ -256,19 +222,18 @@ class VillageController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Village deleted successfully'
+            'message' => 'Village deleted successfully',
         ]);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/v1/villages/{id}/toggle-status",
-     *     tags={"Villages"},
-     *     summary="Toggle village active status (BPS Admin only)",
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(response=200, description="Status toggled")
-     * )
-     */
+    #[OA\Put(
+        path: '/api/v1/villages/{id}/toggle-status',
+        tags: ['Villages'],
+        summary: 'Toggle village active status (BPS Admin only)',
+        security: [['sanctum' => []]],
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [new OA\Response(response: 200, description: 'Status toggled')]
+    )]
     public function toggleStatus(Request $request, $id): JsonResponse
     {
         $village = Village::findOrFail($id);
@@ -281,7 +246,7 @@ class VillageController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -301,7 +266,7 @@ class VillageController extends Controller
                 'id' => $village->id,
                 'name' => $village->name,
                 'is_active' => $village->is_visible,
-            ]
+            ],
         ]);
     }
 

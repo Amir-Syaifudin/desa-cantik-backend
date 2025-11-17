@@ -48,6 +48,6 @@ class PublicationService
     {
         $extension = $file->getClientOriginalExtension();
 
-        return Str::uuid()->toString() . '.' . $extension;
+        return Str::uuid()->toString().'.'.$extension;
     }
 }

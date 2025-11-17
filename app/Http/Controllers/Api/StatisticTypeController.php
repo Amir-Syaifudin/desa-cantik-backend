@@ -16,16 +16,21 @@ class StatisticTypeController extends Controller
      *     summary="List active statistic types",
      *     description="Get list of active statistic types with optional category filter",
      *     tags={"Statistic Types"},
+     *
      *     @OA\Parameter(
      *         name="category",
      *         in="query",
      *         description="Filter by category",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="data", type="array", @OA\Items())
      *         )
@@ -35,13 +40,13 @@ class StatisticTypeController extends Controller
     public function index(Request $request)
     {
         $category = $request->query('category');
-        $cacheKey = 'statistic_types' . ($category ? "_{$category}" : '_all');
+        $cacheKey = 'statistic_types'.($category ? "_{$category}" : '_all');
         $cacheTTL = 3600; // 1 hour
 
-        $types = Cache::remember($cacheKey, $cacheTTL, function () use ($request, $category) {
+        $types = Cache::remember($cacheKey, $cacheTTL, function () use ($category) {
             return StatisticType::query()
                 ->where('is_active', true)
-                ->when($category, fn($query) => $query->where('category', $category))
+                ->when($category, fn ($query) => $query->where('category', $category))
                 ->orderBy('display_order')
                 ->orderBy('name')
                 ->get();

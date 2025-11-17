@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\VillageProfileController;
 use App\Http\Controllers\Api\VillageStatisticController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
 Route::prefix('v1')->group(function () {
     // ===============================================
@@ -43,8 +44,6 @@ Route::prefix('v1')->group(function () {
     // Thematic Maps (Public reads)
     Route::get('villages/{village_id}/thematic-maps', [ThematicMapController::class, 'index']);
     Route::get('thematic-maps/{map_id}', [ThematicMapController::class, 'show']);
-
-
 
     Route::get('villages/{village}/statistics', [VillageStatisticController::class, 'index']);
     Route::get('villages/{village}/statistics/summary', [VillageStatisticController::class, 'summary']);
@@ -148,4 +147,14 @@ Route::get('villages/{id}', [VillageController::class, 'show']);
 // Legacy endpoint for backward compatibility
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// OpenAPI docs JSON endpoint (generates docs on demand if not present)
+Route::get('/documentation/json', function () {
+    $jsonPath = storage_path('api-docs/api-docs.json');
+    if (!file_exists($jsonPath)) {
+        Artisan::call('openapi:generate');
+    }
+
+    return response()->file($jsonPath, ['Content-Type' => 'application/json']);
 });

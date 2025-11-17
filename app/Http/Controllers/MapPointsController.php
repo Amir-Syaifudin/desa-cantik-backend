@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\MapPoint;
 use App\Models\ThematicMap; // Pastikan model ThematicMap digunakan
-use App\Models\MapPoint;    // Pastikan model MapPoint ada
+use Illuminate\Http\Request;    // Pastikan model MapPoint ada
 
 class MapPointsController extends Controller
 {
@@ -30,6 +31,7 @@ class MapPointsController extends Controller
         $payload = $this->mergeCoordinates($validated);
 
         $mapPoint = $thematicMap->mapPoints()->create($payload);
+
         return response()->json([
             'success' => true,
             'data' => $mapPoint,
@@ -63,6 +65,7 @@ class MapPointsController extends Controller
         $payload = $this->mergeCoordinates($validated);
 
         $mapPoint->update($payload); // Update titik peta
+
         return response()->json([
             'success' => true,
             'data' => $mapPoint,
@@ -83,6 +86,7 @@ class MapPointsController extends Controller
         }
 
         $mapPoint->delete(); // Menghapus titik peta
+
         return response()->json([
             'success' => true,
             'message' => 'Map point deleted',

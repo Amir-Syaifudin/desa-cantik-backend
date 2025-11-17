@@ -9,7 +9,6 @@ use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use OpenApi\Annotations as OA;
 
 class GeospatialDataController extends Controller
 {
@@ -37,7 +36,7 @@ class GeospatialDataController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $geospatialData
+            'data' => $geospatialData,
         ]);
     }
 
@@ -60,7 +59,7 @@ class GeospatialDataController extends Controller
                 'properties' => $data->properties ?? [],
                 'created_at' => $data->created_at,
                 'updated_at' => $data->updated_at,
-            ]
+            ],
         ]);
     }
 
@@ -78,7 +77,7 @@ class GeospatialDataController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $village->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to add geospatial data for this village'
+                'message' => 'You do not have permission to add geospatial data for this village',
             ], 403);
         }
 
@@ -93,7 +92,7 @@ class GeospatialDataController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -118,7 +117,7 @@ class GeospatialDataController extends Controller
                 'type' => $data->geometry_type,
                 'geometry' => $data->geojson_data,
                 'properties' => $data->properties ?? [],
-            ]
+            ],
         ], 201);
     }
 
@@ -137,7 +136,7 @@ class GeospatialDataController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $village->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to update this geospatial data'
+                'message' => 'You do not have permission to update this geospatial data',
             ], 403);
         }
 
@@ -152,16 +151,24 @@ class GeospatialDataController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $oldData = $data->toArray();
 
-        if ($request->has('name')) $data->description = $request->name;
-        if ($request->has('type')) $data->geometry_type = $request->type;
-        if ($request->has('geometry')) $data->geojson_data = $request->geometry;
-        if ($request->has('properties')) $data->properties = $request->properties;
+        if ($request->has('name')) {
+            $data->description = $request->name;
+        }
+        if ($request->has('type')) {
+            $data->geometry_type = $request->type;
+        }
+        if ($request->has('geometry')) {
+            $data->geojson_data = $request->geometry;
+        }
+        if ($request->has('properties')) {
+            $data->properties = $request->properties;
+        }
 
         $data->save();
 
@@ -180,7 +187,7 @@ class GeospatialDataController extends Controller
                 'type' => $data->geometry_type,
                 'geometry' => $data->geojson_data,
                 'properties' => $data->properties ?? [],
-            ]
+            ],
         ]);
     }
 
@@ -199,7 +206,7 @@ class GeospatialDataController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $village->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to delete this geospatial data'
+                'message' => 'You do not have permission to delete this geospatial data',
             ], 403);
         }
 
@@ -211,7 +218,7 @@ class GeospatialDataController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Geospatial data deleted successfully'
+            'message' => 'Geospatial data deleted successfully',
         ]);
     }
 }

@@ -32,7 +32,7 @@ return new class extends Migration
                 'role_id',
                 'desa_id',
                 'is_active',
-                'deleted_at'
+                'deleted_at',
             ]);
         });
     }

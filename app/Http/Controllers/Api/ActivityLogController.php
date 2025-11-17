@@ -17,54 +17,71 @@ class ActivityLogController extends Controller
      *     summary="Get activity logs",
      *     description="Retrieve paginated activity logs (BPS Admin only)",
      *     security={{"sanctum": {}}},
+     *
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
      *         description="Page number",
+     *
      *         @OA\Schema(type="integer", default=1)
      *     ),
+     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         description="Items per page",
+     *
      *         @OA\Schema(type="integer", default=15, maximum=100)
      *     ),
+     *
      *     @OA\Parameter(
      *         name="user_id",
      *         in="query",
      *         description="Filter by user ID",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="village_id",
      *         in="query",
      *         description="Filter by village ID",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="action",
      *         in="query",
      *         description="Filter by action type (create, update, delete)",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="model_type",
      *         in="query",
      *         description="Filter by model type",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="from_date",
      *         in="query",
      *         description="Filter from date (Y-m-d H:i:s)",
+     *
      *         @OA\Schema(type="string", format="date-time")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="to_date",
      *         in="query",
      *         description="Filter to date (Y-m-d H:i:s)",
+     *
      *         @OA\Schema(type="string", format="date-time")
      *     ),
+     *
      *     @OA\Response(response=200, description="Success"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden")
@@ -88,7 +105,7 @@ class ActivityLogController extends Controller
                 'new_data',
                 'ip_address',
                 'user_agent',
-                'created_at'
+                'created_at',
             ]);
 
         // Apply filters
@@ -105,7 +122,7 @@ class ActivityLogController extends Controller
         }
 
         if ($request->filled('model_type')) {
-            $query->where('model_type', 'LIKE', '%' . $request->query('model_type') . '%');
+            $query->where('model_type', 'LIKE', '%'.$request->query('model_type').'%');
         }
 
         // Support both spec's date_from/date_to and legacy from_date/to_date
@@ -129,7 +146,7 @@ class ActivityLogController extends Controller
                 'per_page' => $logs->perPage(),
                 'total' => $logs->total(),
                 'last_page' => $logs->lastPage(),
-            ]
+            ],
         ]);
     }
 
@@ -140,13 +157,16 @@ class ActivityLogController extends Controller
      *     summary="Get activity log detail",
      *     description="Get detailed information about a specific activity log (BPS Admin only)",
      *     security={{"sanctum": {}}},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="Activity Log ID",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(response=200, description="Success"),
      *     @OA\Response(response=404, description="Log not found")
      * )
@@ -182,7 +202,7 @@ class ActivityLogController extends Controller
                 'ip_address' => $log->ip_address,
                 'user_agent' => $log->user_agent,
                 'created_at' => $log->created_at,
-            ]
+            ],
         ]);
     }
 
@@ -205,7 +225,7 @@ class ActivityLogController extends Controller
             $query->where('action', $request->query('action'));
         }
         if ($request->filled('model_type')) {
-            $query->where('model_type', 'LIKE', '%' . $request->query('model_type') . '%');
+            $query->where('model_type', 'LIKE', '%'.$request->query('model_type').'%');
         }
         if ($request->filled('date_from') || $request->filled('from_date')) {
             $dateFrom = $request->query('date_from') ?? $request->query('from_date');
@@ -218,7 +238,7 @@ class ActivityLogController extends Controller
 
         $logs = $query->orderBy('created_at', 'desc')->get();
 
-        $filename = 'activity-logs-' . date('Y-m-d-His') . '.csv';
+        $filename = 'activity-logs-'.date('Y-m-d-His').'.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename={$filename}",
@@ -252,7 +272,7 @@ class ActivityLogController extends Controller
      */
     private function calculateChanges($oldData, $newData): array
     {
-        if (!$oldData || !$newData) {
+        if (! $oldData || ! $newData) {
             return [];
         }
 

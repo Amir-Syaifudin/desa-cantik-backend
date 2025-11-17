@@ -44,21 +44,21 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
     }
 
     public function inactive(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'is_active' => false,
         ]);
     }
 
     public function withoutVillage(): static
     {
-        return $this->state(fn() => [
+        return $this->state(fn () => [
             'village_id' => null,
         ]);
     }
