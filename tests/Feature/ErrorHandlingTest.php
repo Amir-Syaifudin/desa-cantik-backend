@@ -68,7 +68,7 @@ class ErrorHandlingTest extends TestCase
 
         $csv = UploadedFile::fake()->createWithContent(
             'corrupted.csv',
-            "statistic_type_code,indicator_name,value,unit,year\n" .
+            "statistic_type_code,indicator_name,value,unit,year\n".
                 "POPULATION_TOTAL,Total Penduduk,invalid_value,jiwa,2024\n"
         );
 
@@ -90,7 +90,7 @@ class ErrorHandlingTest extends TestCase
 
         $csv = UploadedFile::fake()->createWithContent(
             'missing-type.csv',
-            "statistic_type_code,indicator_name,value,unit,year\n" .
+            "statistic_type_code,indicator_name,value,unit,year\n".
                 "NONEXISTENT_CODE,Test,100,unit,2024\n"
         );
 
@@ -120,7 +120,7 @@ class ErrorHandlingTest extends TestCase
 
         $csv = UploadedFile::fake()->createWithContent(
             'large.csv',
-            $header . implode("\n", $rows)
+            $header.implode("\n", $rows)
         );
 
         $response = $this->actingAs($officer, 'sanctum')
@@ -140,9 +140,9 @@ class ErrorHandlingTest extends TestCase
 
         $csv = UploadedFile::fake()->createWithContent(
             'partial.csv',
-            "statistic_type_code,indicator_name,value,unit,year\n" .
-                "VALID_CODE,Valid Row,100,unit,2024\n" .
-                "INVALID_CODE,Invalid Row,200,unit,2024\n" .
+            "statistic_type_code,indicator_name,value,unit,year\n".
+                "VALID_CODE,Valid Row,100,unit,2024\n".
+                "INVALID_CODE,Invalid Row,200,unit,2024\n".
                 "VALID_CODE,Another Valid,300,unit,2024\n"
         );
 
@@ -243,7 +243,7 @@ class ErrorHandlingTest extends TestCase
         // CSV missing required columns
         $csv = UploadedFile::fake()->createWithContent(
             'incomplete.csv',
-            "indicator_name,value\n" .
+            "indicator_name,value\n".
                 "Test,100\n"
         );
 
@@ -266,7 +266,7 @@ class ErrorHandlingTest extends TestCase
         // First import
         $csv1 = UploadedFile::fake()->createWithContent(
             'first.csv',
-            "statistic_type_code,indicator_name,value,unit,year\n" .
+            "statistic_type_code,indicator_name,value,unit,year\n".
                 "TEST_CODE,Test Indicator,100,unit,2024\n"
         );
 
@@ -278,7 +278,7 @@ class ErrorHandlingTest extends TestCase
         // Second import with same data (should create duplicate unless unique constraint exists)
         $csv2 = UploadedFile::fake()->createWithContent(
             'second.csv',
-            "statistic_type_code,indicator_name,value,unit,year\n" .
+            "statistic_type_code,indicator_name,value,unit,year\n".
                 "TEST_CODE,Test Indicator,100,unit,2024\n"
         );
 

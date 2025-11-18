@@ -2,10 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\ActivityLog;
-use App\Models\MapPoint;
-use App\Models\ThematicMap;
-use App\Models\VillageProfile;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,7 +12,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @property-read VillageProfile|null $profile
  */
-
 class Village extends Model
 {
     use HasFactory;

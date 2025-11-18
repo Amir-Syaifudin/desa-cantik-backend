@@ -37,7 +37,7 @@ class CheckDesaOwnership
                 if ($user->desa_id != $routeDesaId) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Access denied. You can only access data from your own desa.'
+                        'message' => 'Access denied. You can only access data from your own desa.',
                     ], 403);
                 }
             }
@@ -50,7 +50,7 @@ class CheckDesaOwnership
         if ($user->hasRole('masyarakat')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Access denied. Insufficient permissions.'
+                'message' => 'Access denied. Insufficient permissions.',
             ], 403);
         }
 

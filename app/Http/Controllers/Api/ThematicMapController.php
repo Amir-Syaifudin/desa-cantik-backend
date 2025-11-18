@@ -9,7 +9,6 @@ use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use OpenApi\Annotations as OA;
 
 class ThematicMapController extends Controller
 {
@@ -38,7 +37,7 @@ class ThematicMapController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $maps
+            'data' => $maps,
         ]);
     }
 
@@ -75,7 +74,7 @@ class ThematicMapController extends Controller
                 }),
                 'created_at' => $map->created_at,
                 'updated_at' => $map->updated_at,
-            ]
+            ],
         ]);
     }
 
@@ -93,7 +92,7 @@ class ThematicMapController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $village->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to create thematic map for this village'
+                'message' => 'You do not have permission to create thematic map for this village',
             ], 403);
         }
 
@@ -107,7 +106,7 @@ class ThematicMapController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -131,7 +130,7 @@ class ThematicMapController extends Controller
                 'theme_name' => $map->map_name,
                 'description' => $map->description,
                 'icon' => $map->map_type,
-            ]
+            ],
         ], 201);
     }
 
@@ -150,7 +149,7 @@ class ThematicMapController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $village->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to update this thematic map'
+                'message' => 'You do not have permission to update this thematic map',
             ], 403);
         }
 
@@ -164,15 +163,21 @@ class ThematicMapController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $oldData = $map->toArray();
 
-        if ($request->has('theme_name')) $map->map_name = $request->theme_name;
-        if ($request->has('description')) $map->description = $request->description;
-        if ($request->has('icon')) $map->map_type = $request->icon;
+        if ($request->has('theme_name')) {
+            $map->map_name = $request->theme_name;
+        }
+        if ($request->has('description')) {
+            $map->description = $request->description;
+        }
+        if ($request->has('icon')) {
+            $map->map_type = $request->icon;
+        }
 
         $map->save();
 
@@ -190,7 +195,7 @@ class ThematicMapController extends Controller
                 'theme_name' => $map->map_name,
                 'description' => $map->description,
                 'icon' => $map->map_type,
-            ]
+            ],
         ]);
     }
 
@@ -209,7 +214,7 @@ class ThematicMapController extends Controller
         if ($userRole === 'village_officer' && $user->village_id !== $village->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'You do not have permission to delete this thematic map'
+                'message' => 'You do not have permission to delete this thematic map',
             ], 403);
         }
 
@@ -223,7 +228,7 @@ class ThematicMapController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Thematic map deleted successfully'
+            'message' => 'Thematic map deleted successfully',
         ]);
     }
 }

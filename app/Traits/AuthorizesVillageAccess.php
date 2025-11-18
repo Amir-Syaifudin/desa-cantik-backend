@@ -21,6 +21,6 @@ trait AuthorizesVillageAccess
             return;
         }
 
-        throw new VillageAccessDeniedException();
+        throw new VillageAccessDeniedException;
     }
 }

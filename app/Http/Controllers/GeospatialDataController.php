@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Models\Village;
 use Illuminate\Http\Request;
-use App\Models\Village; 
 
 class GeospatialDataController extends Controller
 {
@@ -17,7 +18,7 @@ class GeospatialDataController extends Controller
         $data = $village->geospatialData()
             ->orderByDesc('created_at')
             ->get(['id', 'geometry_type', 'geojson_data', 'description', 'uploaded_by', 'created_at', 'updated_at'])
-            ->map(fn($row) => $this->formatGeoResource($village->id, $row));
+            ->map(fn ($row) => $this->formatGeoResource($village->id, $row));
 
         return response()->json([
             'success' => true,
@@ -66,7 +67,7 @@ class GeospatialDataController extends Controller
             $decoded = json_decode($geojsonData, true);
             $geojsonData = $decoded ?? $geojsonData;
         }
-        
+
         $geospatial = $village->geospatialData()->create([
             'geometry_type' => $validated['geometry_type'],
             'geojson_data' => $geojsonData,

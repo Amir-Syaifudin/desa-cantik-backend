@@ -8,9 +8,10 @@ use Illuminate\Http\JsonResponse;
 class InvalidDashboardRequestException extends Exception
 {
     protected $message = 'Invalid dashboard request';
+
     protected $code = 422;
 
-    public function __construct(string $message = null, int $code = 422)
+    public function __construct(?string $message = null, int $code = 422)
     {
         parent::__construct($message ?? $this->message, $code);
     }

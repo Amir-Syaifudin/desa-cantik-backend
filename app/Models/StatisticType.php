@@ -51,7 +51,7 @@ class StatisticType extends Model
         }
 
         // If we don't have a specific model, clear all known categories
-        if (!$model) {
+        if (! $model) {
             $categories = ['kependudukan', 'ekonomi', 'kesehatan', 'pendidikan', 'sosial', 'infrastruktur'];
             foreach ($categories as $category) {
                 Cache::forget("statistic_types_{$category}");

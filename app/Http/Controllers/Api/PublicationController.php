@@ -16,6 +16,7 @@ use App\Traits\AuthorizesVillageAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PublicationController extends Controller
@@ -24,6 +25,60 @@ class PublicationController extends Controller
 
     public function __construct(private PublicationService $publicationService) {}
 
+    #[OA\Get(
+        path: '/api/v1/villages/{village_id}/publications',
+        summary: 'Get village publications',
+        description: 'Returns paginated list of publications for a specific village with optional year filter. Includes file metadata and uploader information.',
+        tags: ['Publications'],
+        parameters: [
+            new OA\Parameter(
+                name: 'village_id',
+                description: 'Village ID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer', example: 10)
+            ),
+            new OA\Parameter(
+                name: 'page',
+                description: 'Page number',
+                in: 'query',
+                schema: new OA\Schema(type: 'integer', default: 1, minimum: 1)
+            ),
+            new OA\Parameter(
+                name: 'per_page',
+                description: 'Items per page (max 100)',
+                in: 'query',
+                schema: new OA\Schema(type: 'integer', default: 15, maximum: 100)
+            ),
+            new OA\Parameter(
+                name: 'year',
+                description: 'Filter by publication year',
+                in: 'query',
+                schema: new OA\Schema(type: 'integer', example: 2024)
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Publications retrieved successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean', example: true),
+                new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/Publication')),
+                new OA\Property(property: 'meta', type: 'object', properties: [
+                    new OA\Property(property: 'current_page', type: 'integer', example: 1),
+                    new OA\Property(property: 'per_page', type: 'integer', example: 15),
+                    new OA\Property(property: 'total', type: 'integer', example: 78),
+                    new OA\Property(property: 'last_page', type: 'integer', example: 6),
+                ]),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Village not found',
+        content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+    )]
     public function index(Request $request, Village $village): JsonResponse
     {
         $perPage = (int) $request->query('per_page', 15);
@@ -50,6 +105,36 @@ class PublicationController extends Controller
         ]);
     }
 
+    #[OA\Get(
+        path: '/api/v1/publications/{id}',
+        summary: 'Get publication detail',
+        description: 'Returns detailed information about a specific publication including file metadata.',
+        tags: ['Publications'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                description: 'Publication ID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer', example: 23)
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Publication retrieved successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean', example: true),
+                new OA\Property(property: 'data', ref: '#/components/schemas/Publication'),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Publication not found',
+        content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+    )]
     public function show(Publication $publication): JsonResponse
     {
         $publication->loadMissing(['village:id,name,village_code', 'uploader:id,full_name']);
@@ -60,6 +145,63 @@ class PublicationController extends Controller
         ]);
     }
 
+    #[OA\Post(
+        path: '/api/v1/villages/{village_id}/publications',
+        summary: 'Upload publication',
+        description: 'Uploads a new publication file (PDF) for a village. Max 200MB. BPS Admins can upload to any village, Village Officers only to their own.',
+        security: [['sanctum' => []]],
+        tags: ['Publications'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['title', 'file', 'published_at'],
+                    properties: [
+                        new OA\Property(property: 'title', type: 'string', example: 'Laporan Statistik Desa 2024'),
+                        new OA\Property(property: 'description', type: 'string', nullable: true, example: 'Laporan lengkap statistik desa'),
+                        new OA\Property(property: 'file', type: 'string', format: 'binary', description: 'PDF file (max 200MB)'),
+                        new OA\Property(property: 'published_at', type: 'string', format: 'date', example: '2024-12-15'),
+                    ]
+                )
+            )
+        ),
+        parameters: [
+            new OA\Parameter(
+                name: 'village_id',
+                description: 'Village ID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer', example: 10)
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Publication uploaded successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean', example: true),
+                new OA\Property(property: 'message', type: 'string', example: 'Publikasi berhasil diunggah'),
+                new OA\Property(property: 'data', ref: '#/components/schemas/Publication'),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthenticated',
+        content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden - Cannot upload to other villages',
+        content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+    )]
+    #[OA\Response(
+        response: 422,
+        description: 'Validation error',
+        content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')
+    )]
     public function store(StorePublicationRequest $request, Village $village): JsonResponse
     {
         $user = $this->user();

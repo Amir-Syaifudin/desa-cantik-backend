@@ -1,58 +1,22 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Models\Village;
 use Illuminate\Http\Request;
-use App\Models\Village; 
-use OpenApi\Annotations as OA;
 
 class VillageController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/villages",
-     *     tags={"Villages"},
-     *     summary="List all villages",
-     *     @OA\Response(
-     *         response=200,
-     *         description="Array of villages",
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/VillageResource"))
-     *     )
-     * )
-     */
     public function getAll()
     {
         $villages = Village::with('profile')
             ->orderBy('name')
             ->get()
-            ->map(fn(Village $village) => $this->formatVillageResponse($village));
+            ->map(fn (Village $village) => $this->formatVillageResponse($village));
 
         return response()->json($villages);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/villages/{id}",
-     *     tags={"Villages"},
-     *     summary="Get village detail",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Village ID",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Village found",
-     *         @OA\JsonContent(ref="#/components/schemas/VillageResource")
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Village not found",
-     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
-     *     )
-     * )
-     */
     public function getDetail($id)
     {
         $village = Village::with('profile')->find($id); // Mencari desa berdasarkan ID
@@ -63,25 +27,6 @@ class VillageController extends Controller
         }
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/villages",
-     *     tags={"Villages"},
-     *     summary="Create a new village",
-     *     security={{"sanctum": {}}},
-     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/VillageCreateRequest")),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Village created",
-     *         @OA\JsonContent(ref="#/components/schemas/VillageResource")
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
-     *     )
-     * )
-     */
     public function create(Request $request)
     {
         $validated = $request->validate([
@@ -91,113 +36,41 @@ class VillageController extends Controller
         ]);
 
         $village = Village::create($validated); // Menyimpan desa baru ke database
+
         return response()->json($village, 201);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/villages/{id}",
-     *     tags={"Villages"},
-     *     summary="Update a village",
-     *     security={{"sanctum": {}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Village ID",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/VillageCreateRequest")),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Village updated",
-     *         @OA\JsonContent(ref="#/components/schemas/VillageResource")
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Village not found",
-     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
-     *     )
-     * )
-     */
     public function update(Request $request, $id)
     {
         $village = Village::find($id);
         if ($village) {
             $village->update($request->all()); // Update data desa
+
             return response()->json($village);
         } else {
             return response()->json(['message' => 'Village not found'], 404);
         }
     }
 
-    /**
-     * @OA\Delete(
-     *     path="/api/villages/{id}",
-     *     tags={"Villages"},
-     *     summary="Delete a village",
-     *     security={{"sanctum": {}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Village ID",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Village deleted",
-     *         @OA\JsonContent(ref="#/components/schemas/MessageResponse")
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Village not found",
-     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
-     *     )
-     * )
-     */
     public function delete($id)
     {
         $village = Village::find($id);
         if ($village) {
             $village->delete(); // Menghapus desa
+
             return response()->json(['message' => 'Village deleted']);
         } else {
             return response()->json(['message' => 'Village not found'], 404);
         }
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/villages/{id}/toggle-status",
-     *     tags={"Villages"},
-     *     summary="Toggle village visibility status",
-     *     security={{"sanctum": {}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Village ID",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Status toggled",
-     *         @OA\JsonContent(ref="#/components/schemas/VillageResource")
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Village not found",
-     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
-     *     )
-     * )
-     */
     public function toggleStatus($id)
     {
         $village = Village::find($id);
         if ($village) {
-            $village->is_active = !$village->is_active; // Toggle status aktif
+            $village->is_visible = ! $village->is_visible; // Toggle status aktif
             $village->save();
+
             return response()->json($village);
         } else {
             return response()->json(['message' => 'Village not found'], 404);

@@ -88,12 +88,12 @@ class DashboardStatisticsService
     protected function recentActivities(?int $villageId = null): array
     {
         return ActivityLog::query()
-            ->when($villageId, fn($query) => $query->where('village_id', $villageId))
+            ->when($villageId, fn ($query) => $query->where('village_id', $villageId))
             ->orderByDesc('created_at')
             ->limit(10)
             ->with('user:id,full_name,username')
             ->get()
-            ->map(fn(ActivityLog $log) => [
+            ->map(fn (ActivityLog $log) => [
                 'id' => $log->id,
                 'user' => $log->user?->full_name ?? $log->user?->username ?? 'System',
                 'action' => $log->action,
@@ -118,7 +118,7 @@ class DashboardStatisticsService
             $publicationsUpdatedAt = $village->publications_max_updated_at ?? null;
             $lastUpdated = collect([$statisticsUpdatedAt, $publicationsUpdatedAt])
                 ->filter()
-                ->map(fn($value) => Carbon::parse($value))
+                ->map(fn ($value) => Carbon::parse($value))
                 ->max();
 
             return [
@@ -151,7 +151,7 @@ class DashboardStatisticsService
             ->limit(6)
             ->get();
 
-        return $rows->map(fn($row) => [
+        return $rows->map(fn ($row) => [
             'month' => $row->month,
             'statistics_created' => (int) $row->statistics_created,
             'statistics_updated' => (int) $row->statistics_updated,
@@ -175,7 +175,7 @@ class DashboardStatisticsService
             $village->statistics()->max('updated_at'),
             $village->publications()->max('updated_at'),
             $village->thematicMaps()->max('updated_at'),
-        ])->filter()->map(fn($timestamp) => Carbon::parse($timestamp))->max();
+        ])->filter()->map(fn ($timestamp) => Carbon::parse($timestamp))->max();
 
         return [
             'total_statistics' => $village->statistics->count(),
@@ -196,7 +196,7 @@ class DashboardStatisticsService
             ->groupBy('statistic_types.category')
             ->get();
 
-        return $rows->map(fn($row) => [
+        return $rows->map(fn ($row) => [
             'category' => $row->category,
             'count' => (int) $row->count,
         ])->toArray();
@@ -267,7 +267,7 @@ class DashboardStatisticsService
             ->orderByDesc('published_at')
             ->limit(5)
             ->get()
-            ->map(fn(Publication $publication) => [
+            ->map(fn (Publication $publication) => [
                 'id' => $publication->id,
                 'title' => $publication->title,
                 'village_name' => $publication->village?->name,
@@ -284,7 +284,7 @@ class DashboardStatisticsService
 
         foreach ($codes as $key => $code) {
             $value = VillageStatistic::query()
-                ->whereHas('statisticType', fn($query) => $query->where('code', $code))
+                ->whereHas('statisticType', fn ($query) => $query->where('code', $code))
                 ->orderByDesc('year')
                 ->limit(1)
                 ->value('value');

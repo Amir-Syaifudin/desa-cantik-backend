@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('indicator_id')->constrained('indicators')->onDelete('cascade');
             $table->integer('display_order')->default(0);
             $table->timestamps();
-            
+
             $table->unique(['thematic_map_id', 'indicator_id']);
         });
     }

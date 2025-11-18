@@ -4,7 +4,6 @@ namespace Tests\Feature\Village;
 
 use App\Models\Village;
 use App\Models\VillageProfile;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class VillageEndpointsTest extends TestCase
@@ -34,6 +33,7 @@ class VillageEndpointsTest extends TestCase
         $response = $this->getJson('/api/v1/villages');
 
         $response->assertOk();
+        $response->assertJsonCount(1, 'data');
         $response->assertJsonPath('data.0.id', (string) $village->id);
         $response->assertJsonPath('data.0.name', 'Test Village');
         $response->assertJsonPath('data.0.district', 'Test District');
@@ -73,8 +73,15 @@ class VillageEndpointsTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonPath('data.id', (string) $village->id);
+        $response->assertJsonPath('data.name', $village->name);
+        $response->assertJsonPath('data.district', $village->kecamatan);
+        $response->assertJsonPath('data.regency', $village->kabupaten);
+        $response->assertJsonPath('data.province', $village->provinsi);
+        $response->assertJsonPath('data.population', 2000);
         $response->assertJsonPath('data.status', 'Tidak Aktif');
         $response->assertJsonPath('data.image', 'https://placehold.co/800x600/1C6EA4/FFFFFF?text=Desa+Cantik');
+        $response->assertJsonPath('data.area', 1);
+        $response->assertJsonPath('data.households', 0);
         $response->assertJsonPath('data.malePopulation', 0);
         $response->assertJsonPath('data.femalePopulation', 0);
     }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->timestamp('activated_at')->nullable();
             $table->timestamp('deactivated_at')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['desa_id', 'module_name']);
         });
     }

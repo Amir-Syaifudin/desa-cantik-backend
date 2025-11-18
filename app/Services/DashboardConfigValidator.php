@@ -9,7 +9,7 @@ class DashboardConfigValidator
 {
     /**
      * Validate that all statistic codes in dashboard config exist in database
-     * 
+     *
      * @return array Array of missing codes
      */
     public static function validateStatisticCodes(): array
@@ -31,8 +31,6 @@ class DashboardConfigValidator
 
     /**
      * Check if dashboard configuration is valid
-     * 
-     * @return bool
      */
     public static function isConfigValid(): bool
     {
@@ -51,8 +49,6 @@ class DashboardConfigValidator
 
     /**
      * Get validation report
-     * 
-     * @return array
      */
     public static function getValidationReport(): array
     {

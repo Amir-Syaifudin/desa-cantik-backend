@@ -14,8 +14,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Excel as ExcelWriter;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
 
@@ -26,7 +26,7 @@ class VillageStatisticService
         // Validate file before processing
         $this->validateImportFile($file);
 
-        $import = new VillageStatisticRowsImport();
+        $import = new VillageStatisticRowsImport;
 
         try {
             Excel::import($import, $file);
@@ -75,6 +75,7 @@ class VillageStatisticService
                     'row' => $rowNumber,
                     'error' => $normalized->getMessage(),
                 ];
+
                 continue;
             }
 
@@ -100,7 +101,7 @@ class VillageStatisticService
                 $summary['failed']++;
                 $summary['errors'][] = [
                     'row' => $rowNumber,
-                    'error' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
+                    'error' => 'Terjadi kesalahan saat menyimpan data: '.$e->getMessage(),
                 ];
             }
         }
@@ -126,7 +127,7 @@ class VillageStatisticService
         $allowedMimes = ['text/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
         $allowedExtensions = ['csv', 'xlsx', 'xls'];
 
-        if (!in_array($file->getMimeType(), $allowedMimes) && !in_array($file->getClientOriginalExtension(), $allowedExtensions)) {
+        if (! in_array($file->getMimeType(), $allowedMimes) && ! in_array($file->getClientOriginalExtension(), $allowedExtensions)) {
             throw new FileUploadException(
                 'Format file tidak didukung. Gunakan CSV atau Excel (xlsx/xls).',
                 'INVALID_FILE_TYPE',
@@ -151,7 +152,7 @@ class VillageStatisticService
 
         $statistics = $village->statistics()
             ->with('statisticType')
-            ->when($year, fn($query) => $query->where('year', $year))
+            ->when($year, fn ($query) => $query->where('year', $year))
             ->orderBy('year')
             ->orderBy('indicator_name')
             ->get();
@@ -171,7 +172,7 @@ class VillageStatisticService
     }
 
     /**
-     * @param array<string, mixed> $row
+     * @param  array<string, mixed>  $row
      * @return array<string, mixed>|ValidationException
      */
     protected function normalizeRow(array $row): array|ValidationException

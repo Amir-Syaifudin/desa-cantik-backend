@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Models\ActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Request as RequestFacade;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Request as RequestFacade;
 
 class ActivityLogger
 {

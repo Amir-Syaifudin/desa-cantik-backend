@@ -20,7 +20,9 @@ class UserRole extends Model
      * Role constants
      */
     public const BPS_ADMIN = 'bps_admin';
+
     public const VILLAGE_OFFICER = 'village_officer';
+
     public const GUEST = 'guest';
 
     /**

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('source', 255)->nullable()->comment('Sumber data');
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
-            
+
             $table->unique(['desa_id', 'indicator_id', 'year']);
         });
     }
