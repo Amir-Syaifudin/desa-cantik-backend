@@ -22,9 +22,11 @@ class DatabaseSeeder extends Seeder
         $this->command->newLine();
         $this->command->info('Test Credentials:');
         $this->command->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        $this->command->info('Admin BPS: admin@bps.go.id / password');
-        $this->command->info('Perangkat Desa 1: nonongan@desacantik.id / password');
-        $this->command->info('Perangkat Desa 2: rindingbatu@desacantik.id / password');
+        $this->command->info('Admin BPS: admin@bps.go.id / password123');
+        $this->command->info('Perangkat Desa 1: nonongan@desacantik.id / password123');
+        $this->command->info('Perangkat Desa 2: rindingbatu@desacantik.id / password123');
+        $this->command->newLine();
+        $this->command->warn('Note: Guest/public users can access public data without login');
         $this->command->newLine();
     }
 }

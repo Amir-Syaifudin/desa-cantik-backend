@@ -97,9 +97,9 @@ Backend API - Laravel 12 | PHP 8.2 | MySQL 8.0
 ### 1. Manajemen Pengguna & Autentikasi
 - Login dengan JWT Token
 - Role-based Access Control (RBAC)
-  - Pegawai BPS: Full access
-  - Perangkat Desa: Manage data desa sendiri
-  - Masyarakat Umum: Read-only data publik
+  - Admin BPS: Full access to all villages and admin functions
+  - Perangkat Desa: Access only to their assigned village data
+  - Guest (Public): Read-only access without authentication
 - Manajemen profil
 - Reset password
 
@@ -265,28 +265,30 @@ Lihat dokumentasi lengkap di:
 
 ## Test Credentials
 
-### Pegawai BPS (Full Access)
+**Note:** Guest/public users do not need to login - they have read-only access to public data.
+
+### Admin BPS (Full Access)
 ```
 Email: admin@bps.go.id
 Password: password123
-Role: Admin BPS
-Access: Semua fitur & semua desa
+Role: bps_admin
+Access: Full access to all villages and admin functions
 ```
 
 ### Perangkat Desa - Nonongan Selatan
 ```
 Email: nonongan@desacantik.id
 Password: password123
-Role: Perangkat Desa
-Access: Data Desa Nonongan Selatan saja
+Role: village_officer
+Access: Data for Desa Nonongan Selatan only
 ```
 
 ### Perangkat Desa - Rindingbatu
 ```
 Email: rindingbatu@desacantik.id
 Password: password123
-Role: Perangkat Desa
-Access: Data Desa Rindingbatu saja
+Role: village_officer
+Access: Data for Desa Rindingbatu only
 ```
 
 **PENTING:** Ganti password default sebelum production deployment!

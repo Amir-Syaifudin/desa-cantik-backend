@@ -18,22 +18,15 @@ class UserSeeder extends Seeder
         if (UserRole::count() === 0) {
             $this->command->info('Creating default roles...');
 
-            UserRole::create(['role_name' => 'admin', 'display_name' => 'Administrator', 'description' => 'System Administrator']);
-            UserRole::create(['role_name' => 'bps_admin', 'display_name' => 'BPS Admin', 'description' => 'BPS Administrator']);
-            UserRole::create(['role_name' => 'bps_staff', 'display_name' => 'BPS Staff', 'description' => 'BPS Staff']);
-            UserRole::create(['role_name' => 'desa_admin', 'display_name' => 'Desa Admin', 'description' => 'Admin Desa']);
-            UserRole::create(['role_name' => 'village_officer', 'display_name' => 'Village Officer', 'description' => 'Village Officer or Perangkat Desa']);
-            UserRole::create(['role_name' => 'guest', 'display_name' => 'Guest', 'description' => 'Guest User']);
+            UserRole::create(['role_name' => 'bps_admin', 'display_name' => 'Admin BPS', 'description' => 'BPS Administrator with full access to all villages']);
+            UserRole::create(['role_name' => 'village_officer', 'display_name' => 'Perangkat Desa', 'description' => 'Village Officer with access only to their assigned village']);
         }
 
         $bpsAdminRole = UserRole::where('role_name', 'bps_admin')->first();
         $villageOfficerRole = UserRole::where('role_name', 'village_officer')->first();
-        $guestRole = UserRole::where('role_name', 'guest')->first();
-        $bpsRole = UserRole::where('role_name', 'bps_staff')->first();
-        $desaRole = UserRole::where('role_name', 'desa_admin')->first();
 
         // Verify required roles exist
-        if (! $bpsAdminRole || ! $villageOfficerRole || ! $guestRole) {
+        if (! $bpsAdminRole || ! $villageOfficerRole) {
             $this->command->error('Required roles not found!');
 
             return;
@@ -44,58 +37,54 @@ class UserSeeder extends Seeder
             User::create([
                 'username' => 'bps_admin',
                 'email' => 'admin@bps.go.id',
-                'password' => Hash::make('password'),
-                'full_name' => 'Administrator BPS',
+                'password' => Hash::make('password123'),
+                'full_name' => 'Administrator BPS Toraja Utara',
                 'phone_number' => '081234567890',
                 'role_id' => $bpsAdminRole->id,
                 'village_id' => null,
                 'is_active' => true,
             ]);
 
-            $this->command->info('✓ BPS Admin user created: admin@bps.go.id (password: password)');
+            $this->command->info('✓ BPS Admin user created: admin@bps.go.id (password: password123)');
         } else {
             $this->command->warn('BPS Admin user already exists. Skipping...');
         }
 
-        // ===== CREATE BPS STAFF USER =====
-        if ($bpsRole && ! User::where('email', 'staff@bps.go.id')->exists()) {
-            User::create([
-                'username' => 'bps_staff',
-                'email' => 'staff@bps.go.id',
-                'password' => Hash::make('password'),
-                'full_name' => 'Staff BPS Toraja Utara',
-                'phone_number' => '081234567891',
-                'role_id' => $bpsRole->id,
-                'village_id' => null,
-                'is_active' => true,
-            ]);
-
-            $this->command->info('✓ BPS Staff user created: staff@bps.go.id (password: password)');
-        } else {
-            $this->command->warn('BPS Staff user already exists or role missing. Skipping...');
-        }
-
-        // ===== CREATE VILLAGE OFFICER USER =====
-        $village = Village::first();
-        if ($village && $villageOfficerRole) {
-            if (! User::where('email', 'officer@desa.go.id')->exists()) {
+        // ===== CREATE VILLAGE OFFICER USERS =====
+        $villages = Village::all();
+        if ($villages->count() > 0 && $villageOfficerRole) {
+            // Create village officers for Nonongan Selatan and Rindingbatu if they exist
+            $nonongan = $villages->firstWhere('name', 'Nonongan Selatan');
+            if ($nonongan && ! User::where('email', 'nonongan@desacantik.id')->exists()) {
                 User::create([
-                    'username' => 'village_officer',
-                    'email' => 'officer@desa.go.id',
-                    'password' => Hash::make('password'),
-                    'full_name' => 'Perangkat Desa '.$village->name,
+                    'username' => 'perangkat_nonongan',
+                    'email' => 'nonongan@desacantik.id',
+                    'password' => Hash::make('password123'),
+                    'full_name' => 'Perangkat Desa Nonongan Selatan',
                     'phone_number' => '081234567891',
                     'role_id' => $villageOfficerRole->id,
-                    'village_id' => $village->id,
+                    'village_id' => $nonongan->id,
                     'is_active' => true,
                 ]);
+                $this->command->info('✓ Village Officer created: nonongan@desacantik.id (password: password123)');
+            }
 
-                $this->command->info('✓ Village Officer user created: officer@desa.go.id (password: password)');
-            } else {
-                $this->command->warn('Village Officer user already exists. Skipping...');
+            $rindingbatu = $villages->firstWhere('name', 'Rindingbatu');
+            if ($rindingbatu && ! User::where('email', 'rindingbatu@desacantik.id')->exists()) {
+                User::create([
+                    'username' => 'perangkat_rindingbatu',
+                    'email' => 'rindingbatu@desacantik.id',
+                    'password' => Hash::make('password123'),
+                    'full_name' => 'Perangkat Desa Rindingbatu',
+                    'phone_number' => '081234567892',
+                    'role_id' => $villageOfficerRole->id,
+                    'village_id' => $rindingbatu->id,
+                    'is_active' => true,
+                ]);
+                $this->command->info('✓ Village Officer created: rindingbatu@desacantik.id (password: password123)');
             }
         } else {
-            $this->command->warn('No village found in database. Skipping village officer/desa admin creation.');
+            $this->command->warn('No villages found in database. Skipping village officer creation.');
         }
 
         // ===== SUMMARY =====
@@ -103,7 +92,7 @@ class UserSeeder extends Seeder
         $this->command->info('==================================');
         $this->command->info('✓ User seeding completed!');
         $this->command->info('==================================');
-        $this->command->info('Total Users: '.User::count());
-        $this->command->info('Total Roles: '.UserRole::count());
+        $this->command->info('Total Users: ' . User::count());
+        $this->command->info('Total Roles: ' . UserRole::count());
     }
 }
