@@ -16,10 +16,33 @@ class VillageProfileController extends Controller
 {
     #[OA\Get(
         path: '/api/v1/villages/{village_id}/profile',
+        summary: 'Get village profile',
+        description: 'Returns the complete profile for a village including description, vision, mission, demographics, and contact information. Publicly accessible.',
         tags: ['Village Profile'],
-        summary: 'Get village profile (Public)',
-        parameters: [new OA\Parameter(name: 'village_id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        responses: [new OA\Response(response: 200, description: 'Success'), new OA\Response(response: 404, description: 'Village not found')]
+        parameters: [
+            new OA\Parameter(
+                name: 'village_id',
+                description: 'Village ID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer', example: 10)
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Village profile retrieved successfully',
+        content: new OA\JsonContent(ref: '#/components/schemas/VillageProfileResponse')
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Village or profile not found',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean', example: false),
+                new OA\Property(property: 'message', type: 'string', example: 'Village profile not found'),
+            ]
+        )
     )]
     public function show($villageId): JsonResponse
     {
@@ -58,12 +81,59 @@ class VillageProfileController extends Controller
 
     #[OA\Put(
         path: '/api/v1/villages/{village_id}/profile',
-        tags: ['Village Profile'],
         summary: 'Update village profile',
-        description: 'Update village profile (BPS Admin or Village Officer for own village)',
+        description: 'Updates village profile information. BPS Admins can update any village, Village Officers can only update their own village. All fields are optional - only provided fields will be updated.',
         security: [['sanctum' => []]],
-        parameters: [new OA\Parameter(name: 'village_id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        responses: [new OA\Response(response: 200, description: 'Profile updated'), new OA\Response(response: 403, description: 'Forbidden')]
+        tags: ['Village Profile'],
+        parameters: [
+            new OA\Parameter(
+                name: 'village_id',
+                description: 'Village ID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer', example: 10)
+            ),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/UpdateVillageProfileRequest')
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Profile updated successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean', example: true),
+                new OA\Property(property: 'message', type: 'string', example: 'Village profile updated successfully'),
+                new OA\Property(property: 'data', ref: '#/components/schemas/VillageProfile'),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthenticated',
+        content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden - Cannot update other villages as village officer',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean', example: false),
+                new OA\Property(property: 'message', type: 'string', example: 'You do not have permission to update this village profile'),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Village not found',
+        content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+    )]
+    #[OA\Response(
+        response: 422,
+        description: 'Validation error',
+        content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')
     )]
     public function update(Request $request, $villageId): JsonResponse
     {

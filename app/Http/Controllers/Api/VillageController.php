@@ -15,16 +15,40 @@ class VillageController extends Controller
 {
     #[OA\Get(
         path: '/api/v1/villages',
+        summary: 'Get all villages',
+        description: 'Returns a paginated list of villages with optional search and active status filters. Includes village profiles with population and area data. Publicly accessible.',
         tags: ['Villages'],
-        summary: 'Get all villages (Public)',
-        description: 'Retrieve paginated list of villages with optional filters',
         parameters: [
-            new OA\Parameter(name: 'page', in: 'query', description: 'Page number', schema: new OA\Schema(type: 'integer', default: 1)),
-            new OA\Parameter(name: 'per_page', in: 'query', description: 'Items per page', schema: new OA\Schema(type: 'integer', default: 15, maximum: 100)),
-            new OA\Parameter(name: 'search', in: 'query', description: 'Search by name or district', schema: new OA\Schema(type: 'string')),
-            new OA\Parameter(name: 'is_active', in: 'query', description: 'Filter by active status', schema: new OA\Schema(type: 'boolean', default: true)),
-        ],
-        responses: [new OA\Response(response: 200, description: 'Success')]
+            new OA\Parameter(
+                name: 'page',
+                description: 'Page number for pagination',
+                in: 'query',
+                schema: new OA\Schema(type: 'integer', default: 1, minimum: 1)
+            ),
+            new OA\Parameter(
+                name: 'per_page',
+                description: 'Number of items per page (max 100)',
+                in: 'query',
+                schema: new OA\Schema(type: 'integer', default: 15, maximum: 100)
+            ),
+            new OA\Parameter(
+                name: 'search',
+                description: 'Search by village name, district (kecamatan), or regency (kabupaten)',
+                in: 'query',
+                schema: new OA\Schema(type: 'string', example: 'Nonongan')
+            ),
+            new OA\Parameter(
+                name: 'is_active',
+                description: 'Filter by active status (use "all" to show both active and inactive)',
+                in: 'query',
+                schema: new OA\Schema(type: 'string', default: 'true', enum: ['true', 'false', 'all'])
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Villages retrieved successfully',
+        content: new OA\JsonContent(ref: '#/components/schemas/VillagesResponse')
     )]
     public function index(Request $request): JsonResponse
     {
@@ -55,7 +79,7 @@ class VillageController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => collect($villages->items())->map(fn (Village $village) => $this->mapVillageToFrontendPayload($village))->values(),
+            'data' => collect($villages->items())->map(fn(Village $village) => $this->mapVillageToFrontendPayload($village))->values(),
             'meta' => [
                 'current_page' => $villages->currentPage(),
                 'per_page' => $villages->perPage(),
@@ -67,10 +91,28 @@ class VillageController extends Controller
 
     #[OA\Get(
         path: '/api/v1/villages/{id}',
+        summary: 'Get village detail',
+        description: 'Returns detailed information about a specific village including full profile data (description, vision, mission, demographics, contact). Publicly accessible.',
         tags: ['Villages'],
-        summary: 'Get village detail (Public)',
-        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        responses: [new OA\Response(response: 200, description: 'Success'), new OA\Response(response: 404, description: 'Village not found')]
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                description: 'Village ID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer', example: 10)
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Village detail retrieved successfully',
+        content: new OA\JsonContent(ref: '#/components/schemas/VillageDetailResponse')
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Village not found',
+        content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
     )]
     public function show($id): JsonResponse
     {
@@ -148,7 +190,7 @@ class VillageController extends Controller
         $village = Village::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'code' => 'sometimes|string|max:20|unique:villages,village_code,'.$id,
+            'code' => 'sometimes|string|max:20|unique:villages,village_code,' . $id,
             'name' => 'sometimes|string|max:255',
             'district' => 'sometimes|string|max:255',
             'subdistrict' => 'sometimes|string|max:255',

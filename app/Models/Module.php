@@ -9,7 +9,9 @@ class Module extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'status'];
+    protected $table = 'desa_modules';
+
+    protected $fillable = ['name', 'status', 'village_id'];
 
     // Menyatakan bahwa modul milik desa
     public function village()

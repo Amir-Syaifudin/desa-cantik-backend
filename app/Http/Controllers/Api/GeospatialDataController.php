@@ -85,7 +85,6 @@ class GeospatialDataController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:100',
             'geometry' => 'required|array',
-            'properties' => 'sometimes|array',
         ]);
 
         if ($validator->fails()) {
@@ -100,7 +99,6 @@ class GeospatialDataController extends Controller
             'desa_id' => $village->id,
             'geometry_type' => $request->type,
             'geojson_data' => $request->geometry,
-            'properties' => $request->properties ?? [],
             'description' => $request->name,
             'uploaded_by' => $user->id,
         ]);
@@ -116,7 +114,6 @@ class GeospatialDataController extends Controller
                 'name' => $data->description,
                 'type' => $data->geometry_type,
                 'geometry' => $data->geojson_data,
-                'properties' => $data->properties ?? [],
             ],
         ], 201);
     }
@@ -144,7 +141,6 @@ class GeospatialDataController extends Controller
             'name' => 'sometimes|string|max:255',
             'type' => 'sometimes|string|max:100',
             'geometry' => 'sometimes|array',
-            'properties' => 'sometimes|array',
         ]);
 
         if ($validator->fails()) {
@@ -165,9 +161,6 @@ class GeospatialDataController extends Controller
         }
         if ($request->has('geometry')) {
             $data->geojson_data = $request->geometry;
-        }
-        if ($request->has('properties')) {
-            $data->properties = $request->properties;
         }
 
         $data->save();

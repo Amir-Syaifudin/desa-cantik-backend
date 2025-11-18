@@ -159,21 +159,29 @@ trait CreatesTestData
 
         // Peta Kepadatan Penduduk (using boundary polygon)
         $maps['population'] = ThematicMap::factory()->create([
-            'village_id' => $village->id,
-            'geospatial_data_id' => $geospatialData['boundary']->id,
-            'name' => 'Peta Kepadatan Penduduk',
+            'desa_id' => $village->id,
+            'map_name' => 'Peta Kepadatan Penduduk',
+            'map_type' => 'Demografi',
             'description' => 'Visualisasi kepadatan penduduk per wilayah',
-            'color' => '#FF0000',
+            'layer_config' => [
+                'color' => '#FF0000',
+                'opacity' => 0.7,
+                'geospatial_data_id' => $geospatialData['boundary']->id,
+            ],
             'is_active' => true,
         ]);
 
         // Peta Fasilitas Pendidikan (using school points)
         $maps['education'] = ThematicMap::factory()->create([
-            'village_id' => $village->id,
-            'geospatial_data_id' => $geospatialData['schools']->id,
-            'name' => 'Peta Fasilitas Pendidikan',
+            'desa_id' => $village->id,
+            'map_name' => 'Peta Fasilitas Pendidikan',
+            'map_type' => 'Pendidikan',
             'description' => 'Lokasi sekolah dan fasilitas pendidikan',
-            'color' => '#0000FF',
+            'layer_config' => [
+                'color' => '#0000FF',
+                'opacity' => 0.8,
+                'geospatial_data_id' => $geospatialData['schools']->id,
+            ],
             'is_active' => true,
         ]);
 

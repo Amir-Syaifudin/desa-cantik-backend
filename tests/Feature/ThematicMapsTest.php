@@ -56,9 +56,12 @@ class ThematicMapsTest extends TestCase
                     '*' => [
                         'id',
                         'village_id',
-                        'name',
-                        'color',
-                        'geospatial_data_id',
+                        'theme_name',
+                        'description',
+                        'icon',
+                        'points_count',
+                        'created_at',
+                        'updated_at',
                     ],
                 ],
             ])
@@ -174,7 +177,7 @@ class ThematicMapsTest extends TestCase
         $this->actingAs($admin, 'sanctum');
 
         $response = $this->postJson("/api/v1/villages/{$village->id}/thematic-maps", [
-            'name' => 'Peta Kesehatan',
+            'theme_name' => 'Peta Kesehatan',
             'description' => 'Peta fasilitas kesehatan',
             'geospatial_data_id' => $geoData->id,
             'color' => '#00FF00',
