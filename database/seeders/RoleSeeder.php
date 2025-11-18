@@ -12,28 +12,22 @@ class RoleSeeder extends Seeder
         $roles = [
             [
                 'role_name' => 'bps_admin',
-                'display_name' => 'BPS Admin',
-                'description' => 'Administrator dari BPS yang mengelola seluruh sistem',
+                'display_name' => 'Admin BPS',
+                'description' => 'BPS Administrator with full access to all villages and admin functions',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'role_name' => 'village_officer',
                 'display_name' => 'Perangkat Desa',
-                'description' => 'Perangkat desa yang mengelola data desa masing-masing',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'role_name' => 'guest',
-                'display_name' => 'Masyarakat Umum',
-                'description' => 'Masyarakat umum yang dapat melihat data publik',
+                'description' => 'Village Officer with access only to their assigned village',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
         ];
 
         DB::table('roles')->insert($roles);
-        $this->command->info('✅ 3 roles created');
+        $this->command->info('✅ 2 roles created (bps_admin, village_officer)');
+        $this->command->info('Note: Guest/public users do not require a role or authentication');
     }
 }

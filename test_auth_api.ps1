@@ -15,7 +15,7 @@ Write-Host "[1/9] Testing Login with Email..." -ForegroundColor Yellow
 try {
     $loginResponse = Invoke-RestMethod -Uri "$BASE_URL/auth/login" -Method POST -Body (@{
         login = "admin@bps.go.id"
-        password = "password"
+        password = "password123"
     } | ConvertTo-Json) -ContentType "application/json"
     
     $token = $loginResponse.data.token
@@ -37,8 +37,8 @@ try {
 Write-Host "`n[2/9] Testing Login with Username..." -ForegroundColor Yellow
 try {
     $loginUsernameResponse = Invoke-RestMethod -Uri "$BASE_URL/auth/login" -Method POST -Body (@{
-        login = "admin"
-        password = "password"
+        login = "bps_admin"
+        password = "password123"
     } | ConvertTo-Json) -ContentType "application/json"
     
     Write-Host "  ✓ Login with Username Success!" -ForegroundColor Green
