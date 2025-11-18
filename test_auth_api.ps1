@@ -48,6 +48,37 @@ try {
     Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Red
 }
 
+# ===== TEST 3: LOGIN AS VILLAGE OFFICER (RINDINGBATU) =====
+Write-Host "`n[3/9] Testing login as Village Officer (Rindingbatu)..." -ForegroundColor Yellow
+try {
+    $loginVillageResponse = Invoke-RestMethod -Uri "$BASE_URL/auth/login" -Method POST -Body (@{
+        login = "rindingbatu@desacantik.id"
+        password = "password123"
+    } | ConvertTo-Json) -ContentType "application/json"
+    $vToken = $loginVillageResponse.data.token
+    Write-Host "  ✓ Village officer login Success!" -ForegroundColor Green
+    Write-Host "    User: $($loginVillageResponse.data.user.full_name)" -ForegroundColor Gray
+    $vHeaders = @{ "Authorization" = "Bearer $vToken"; "Accept" = "application/json" }
+    $villageId = $loginVillageResponse.data.user.village.id
+    Write-Host "    Village ID: $villageId" -ForegroundColor Gray
+    # Fetch profile
+    $villageProfile = Invoke-RestMethod -Uri "$BASE_URL/villages/$villageId/profile" -Method GET -Headers $vHeaders
+    Write-Host "  ✓ Village profile fetched for Rindingbatu: $($villageProfile.data.name)" -ForegroundColor Green
+} catch {
+    Write-Host "  ✗ Village officer login or profile fetch failed: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# ===== TEST 4: VILLAGE OFFICER ACCESS ADMIN DASHBOARD (SHOULD FAIL) =====
+Write-Host "`n[4/9] Testing village officer cannot access admin dashboard..." -ForegroundColor Yellow
+try {
+    # Try admin dashboard with village officer token
+    $adminDashResponse = Invoke-RestMethod -Uri "$BASE_URL/dashboard/admin" -Method GET -Headers $vHeaders
+    Write-Host "  ✗ Village officer unexpectedly accessed admin dashboard" -ForegroundColor Red
+} catch {
+    Write-Host "  ✓ Village officer blocked from admin dashboard (expected)." -ForegroundColor Green
+    Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Gray
+}
+
 # ===== TEST 3: GET CURRENT USER =====
 Write-Host "`n[3/9] Testing Get Current User..." -ForegroundColor Yellow
 $headers = @{ 
@@ -65,6 +96,21 @@ try {
 } catch {
     Write-Host "  ✗ Get User Failed!" -ForegroundColor Red
     Write-Host "    Error: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# ===== TEST 4: FETCH VILLAGE PROFILE FOR LOGGED-IN USER =====
+Write-Host "`n[4/9] Testing Fetch Village Profile for logged-in user..." -ForegroundColor Yellow
+try {
+    $villageId = $userResponse.data.village.id
+    if (-not $villageId) {
+        Write-Host "  ✗ No village associated with logged-in user." -ForegroundColor Red
+    } else {
+        $profileResponse = Invoke-RestMethod -Uri "$BASE_URL/villages/$villageId/profile" -Method GET -Headers $headers
+        Write-Host "  ✓ Village Profile fetched for village id $villageId" -ForegroundColor Green
+        Write-Host "    Village name: $($profileResponse.data.name)" -ForegroundColor Gray
+    }
+} catch {
+    Write-Host "  ✗ Failed to fetch village profile: $($_.Exception.Message)" -ForegroundColor Red
 }
 
 # ===== TEST 4: UPDATE PROFILE =====
