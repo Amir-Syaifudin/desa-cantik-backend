@@ -240,7 +240,9 @@ class DashboardStatisticsService
             'total_villages' => Village::where('is_visible', true)->count(),
             'total_statistics' => VillageStatistic::count(),
             'total_publications' => Publication::count(),
+            // Provide both last_updated and last_update to satisfy frontend expectations
             'last_updated' => VillageStatistic::max('updated_at')?->toISOString(),
+            'last_update' => VillageStatistic::max('updated_at')?->toISOString(),
         ];
     }
 

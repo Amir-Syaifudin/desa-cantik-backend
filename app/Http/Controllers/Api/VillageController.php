@@ -337,6 +337,11 @@ class VillageController extends Controller
                 ?? $profile?->logo_url
                 ?? $village->logo_url
                 ?? 'https://placehold.co/800x600/1C6EA4/FFFFFF?text=Desa+Cantik',
+            'image_url' => $profile?->thumbnail_url
+                ?? $profile?->logo_url
+                ?? $village->logo_url
+                ?? 'https://placehold.co/800x600/1C6EA4/FFFFFF?text=Desa+Cantik',
+            'logo_url' => $profile?->logo_url ?? $village->logo_url,
             'area' => $profile?->area ?? 0.0,
             'households' => $profile?->households ?? 0,
             'malePopulation' => $profile?->male_population ?? 0,
