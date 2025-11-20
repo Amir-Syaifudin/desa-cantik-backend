@@ -63,6 +63,9 @@ class VillageStatisticController extends Controller
                 'period',
                 'source',
                 'notes',
+                'status',
+                'file_name',
+                'file_url',
                 'created_by',
                 'updated_by',
                 'created_at',
@@ -73,8 +76,8 @@ class VillageStatisticController extends Controller
                 'creator:id,full_name,name',
             ])
             ->where('village_id', $village->id)
-            ->when($request->filled('year'), fn ($query) => $query->where('year', $request->query('year')))
-            ->when($request->filled('statistic_type_id'), fn ($query) => $query->where('statistic_type_id', $request->query('statistic_type_id')))
+            ->when($request->filled('year'), fn($query) => $query->where('year', $request->query('year')))
+            ->when($request->filled('statistic_type_id'), fn($query) => $query->where('statistic_type_id', $request->query('statistic_type_id')))
             ->orderByDesc('year')
             ->orderBy('indicator_name')
             ->paginate($perPage)
@@ -102,7 +105,7 @@ class VillageStatisticController extends Controller
             ->select(['id', 'village_id', 'statistic_type_id', 'indicator_name', 'value', 'unit', 'year'])
             ->with('statisticType:id,name,code,category,description,display_order')
             ->where('village_id', $village->id)
-            ->when($year, fn ($query) => $query->where('year', $year))
+            ->when($year, fn($query) => $query->where('year', $year))
             ->get();
 
         $effectiveYear = $year ?? $statistics->max('year');
@@ -140,6 +143,16 @@ class VillageStatisticController extends Controller
 
         $data = $request->validated();
 
+        $fileName = null;
+        $fileUrl = null;
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = $file->getClientOriginalName();
+            $path = $file->store('statistics', 'public');
+            $fileUrl = url('storage/' . $path);
+        }
+
         $statistic = VillageStatistic::create([
             'village_id' => $village->id,
             'statistic_type_id' => $data['statistic_type_id'],
@@ -150,6 +163,9 @@ class VillageStatisticController extends Controller
             'period' => $data['period'] ?? null,
             'source' => $data['source'] ?? null,
             'notes' => $data['notes'] ?? null,
+            'status' => $data['status'] ?? 'Menunggu Validasi',
+            'file_name' => $fileName,
+            'file_url' => $fileUrl,
             'created_by' => $user->id,
         ]);
 
@@ -180,6 +196,14 @@ class VillageStatisticController extends Controller
         $statistic = $this->findStatisticOrFail($village, $statistic);
 
         $data = $request->validated();
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $data['file_name'] = $file->getClientOriginalName();
+            $path = $file->store('statistics', 'public');
+            $data['file_url'] = url('storage/' . $path);
+        }
+
         $original = $statistic->toArray();
         $statistic->fill($data);
         $statistic->updated_by = $user->id;
