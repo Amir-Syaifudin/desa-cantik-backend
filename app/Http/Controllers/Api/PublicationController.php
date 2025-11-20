@@ -209,11 +209,17 @@ class PublicationController extends Controller
 
         $fileMeta = $this->publicationService->storeFile($request->file('file'), $village);
 
+        $status = $request->input('status');
+        if ($status === 'Rilis') $status = 'Terverifikasi';
+        if ($status === 'Diarsipkan') $status = 'Draft';
+
         $publication = Publication::create([
             'desa_id' => $village->id,
             'title' => $request->input('title'),
             'description' => $request->input('description'),
             'published_at' => $request->input('published_at'),
+            'category' => $request->input('category'),
+            'status' => $status ?? 'Draft',
             'uploaded_by' => $user->id,
             'file_path' => $fileMeta['file_path'],
             'file_name' => $fileMeta['file_name'],
@@ -245,6 +251,12 @@ class PublicationController extends Controller
         $this->ensurePublicationBelongsToVillage($publication, $village);
 
         $data = $request->validated();
+
+        if (isset($data['status'])) {
+            if ($data['status'] === 'Rilis') $data['status'] = 'Terverifikasi';
+            if ($data['status'] === 'Diarsipkan') $data['status'] = 'Draft';
+        }
+
         $original = $publication->toArray();
         $publication->fill($data);
         $publication->save();

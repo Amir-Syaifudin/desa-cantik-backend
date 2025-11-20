@@ -17,7 +17,9 @@ class StorePublicationRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'published_at' => 'required|date|before_or_equal:today',
-            'file' => 'required|file|mimes:pdf,doc,docx|max:10240',
+            'file' => 'required|file|mimes:pdf,doc,docx|max:204800', // 200MB
+            'category' => 'nullable|string|max:100',
+            'status' => 'nullable|string|max:50',
         ];
     }
 }

@@ -17,6 +17,8 @@ class UpdatePublicationRequest extends FormRequest
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'published_at' => 'sometimes|date|before_or_equal:today',
+            'category' => 'nullable|string|max:100',
+            'status' => 'nullable|string|max:50',
         ];
     }
 }
