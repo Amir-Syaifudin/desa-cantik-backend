@@ -8,15 +8,21 @@ class PublicationResource extends JsonResource
 {
     public function toArray($request): array
     {
+        $publishedAt = $this->published_at;
+
         return [
             'id' => $this->id,
-            'village_id' => $this->desa_id,
             'title' => $this->title,
+            'date' => $publishedAt?->toDateString(),
+            'year' => $publishedAt?->year,
+            'month' => $publishedAt?->month,
             'description' => $this->description,
+            'imageUrl' => 'https://placehold.co/300x400/BFDBFE/1E3A8A?text=' . urlencode($this->title),
+            'status' => $this->status,
+            'category' => $this->category,
             'file_name' => $this->file_name,
             'file_size' => $this->file_size_bytes,
             'file_type' => $this->file_type,
-            'published_at' => optional($this->published_at)->toDateString(),
             'download_url' => $this->download_url,
             'uploaded_by' => $this->whenLoaded('uploader', function () {
                 return [

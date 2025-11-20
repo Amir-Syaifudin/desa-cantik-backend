@@ -31,6 +31,7 @@ Route::prefix('v1')->group(function () {
     // ===============================================
     Route::get('statistic-types', [StatisticTypeController::class, 'index']);
     Route::get('dashboard/public', [DashboardController::class, 'public']);
+    Route::get('publications/metadata', [PublicationController::class, 'metadata']);
 
     // Villages (Public)
     Route::get('villages', [VillageController::class, 'index']);

@@ -342,6 +342,52 @@ class PublicationController extends Controller
         );
     }
 
+    /**
+     * Get publication metadata (categories and statuses)
+     */
+    #[OA\Get(
+        path: '/api/v1/publications/metadata',
+        summary: 'Get publication metadata',
+        description: 'Returns available categories and statuses for publications',
+        tags: ['Publications']
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Metadata retrieved successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean', example: true),
+                new OA\Property(property: 'data', type: 'object', properties: [
+                    new OA\Property(property: 'categories', type: 'array', items: new OA\Items(type: 'string')),
+                    new OA\Property(property: 'statuses', type: 'array', items: new OA\Items(type: 'string')),
+                ])
+            ]
+        )
+    )]
+    public function metadata(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'categories' => [
+                    'Statistik Desa',
+                    'Sosial',
+                    'Ekonomi Lokal',
+                    'Pemerintahan',
+                    'Infrastruktur',
+                    'Pendidikan',
+                    'Kesehatan',
+                ],
+                'statuses' => [
+                    'Draft',
+                    'Perlu Validasi',
+                    'Terverifikasi',
+                    'Batal Terbit',
+                ],
+            ],
+        ]);
+    }
+
     protected function ensurePublicationBelongsToVillage(Publication $publication, Village $village): void
     {
         if ((int) $publication->desa_id !== (int) $village->id) {
