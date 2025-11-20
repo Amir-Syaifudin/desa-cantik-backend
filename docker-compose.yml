@@ -45,6 +45,24 @@ services:
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
     networks:
       - desa-cantik-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: desa_cantik_pma
+    restart: always
+    environment:
+      PMA_HOST: mysql                 # Harus sama dengan nama service database
+      PMA_PORT: 3306
+      PMA_USER: desa_cantik_user      
+      PMA_PASSWORD: DesaCantik2025! 
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8081:80"                     # Kita buka di port 8081
+    depends_on:
+      - mysql
+    networks:
+      - desa-cantik-network
+
 networks:
   desa-cantik-network:
     driver: bridge
