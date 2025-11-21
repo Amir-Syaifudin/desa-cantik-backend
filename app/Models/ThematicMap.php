@@ -14,7 +14,7 @@ class ThematicMap extends Model
     protected $table = 'thematic_maps';
 
     protected $fillable = [
-        'desa_id',
+        'village_id',
         'map_name',
         'map_type',
         'description',
@@ -36,7 +36,7 @@ class ThematicMap extends Model
     
     public function village(): BelongsTo
     {
-        return $this->belongsTo(Village::class, 'desa_id');
+        return $this->belongsTo(Village::class, 'village_id');
     }
 
     public function mapPoints(): HasMany

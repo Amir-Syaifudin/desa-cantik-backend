@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('desa_indicator_data', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('desa_id')->constrained('desa')->onDelete('cascade');
+            $table->foreignId('village_id')->constrained('villages')->onDelete('cascade');
             $table->foreignId('indicator_id')->constrained('indicators')->onDelete('cascade');
             $table->year('year');
             $table->decimal('value', 20, 4);
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
 
-            $table->unique(['desa_id', 'indicator_id', 'year']);
+            $table->unique(['village_id', 'indicator_id', 'year']);
         });
     }
 

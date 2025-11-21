@@ -21,13 +21,13 @@ class ThematicMapSeeder extends Seeder
         foreach ($villages as $village) {
             // 1. Ambil ID Geospatial Data yang sudah di-seed sebelumnya
             // Pastikan deskripsi di sini SAMA PERSIS dengan yang ada di GeospatialDataSeeder
-            $geoBatas = GeospatialData::where('desa_id', $village->id)->where('description', 'Batas Wilayah Desa')->first();
-            $geoSekolah = GeospatialData::where('desa_id', $village->id)->where('description', 'Titik Lokasi Sekolah')->first();
-            $geoSungai = GeospatialData::where('desa_id', $village->id)->where('description', 'Jaringan Sungai')->first();
+            $geoBatas = GeospatialData::where('village_id', $village->id)->where('description', 'Batas Wilayah Desa')->first();
+            $geoSekolah = GeospatialData::where('village_id', $village->id)->where('description', 'Titik Lokasi Sekolah')->first();
+            $geoSungai = GeospatialData::where('village_id', $village->id)->where('description', 'Jaringan Sungai')->first();
 
             $maps = [
                 [
-                    'desa_id' => $village->id, // Sesuai migration thematic_maps
+                    'village_id' => $village->id, // Sesuai migration thematic_maps
                     'map_name' => 'Peta Kepadatan Penduduk',
                     'map_type' => 'Demografi',
                     'description' => 'Visualisasi kepadatan penduduk per wilayah',
@@ -44,7 +44,7 @@ class ThematicMapSeeder extends Seeder
                     'is_active' => true,
                 ],
                 [
-                    'desa_id' => $village->id,
+                    'village_id' => $village->id,
                     'map_name' => 'Peta Sebaran Sekolah',
                     'map_type' => 'Pendidikan',
                     'description' => 'Lokasi sekolah dan fasilitas pendidikan',
@@ -56,7 +56,7 @@ class ThematicMapSeeder extends Seeder
                     'is_active' => true,
                 ],
                 [
-                    'desa_id' => $village->id,
+                    'village_id' => $village->id,
                     'map_name' => 'Peta Potensi Perairan',
                     'map_type' => 'Lingkungan',
                     'description' => 'Jalur aliran sungai utama',
@@ -73,7 +73,7 @@ class ThematicMapSeeder extends Seeder
                 // Gunakan updateOrCreate agar tidak duplikat saat seed ulang
                 ThematicMap::updateOrCreate(
                     [
-                        'desa_id' => $mapData['desa_id'],
+                        'village_id' => $mapData['village_id'],
                         'map_name' => $mapData['map_name'],
                     ],
                     $mapData

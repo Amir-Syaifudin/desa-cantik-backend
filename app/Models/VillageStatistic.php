@@ -11,7 +11,7 @@ class VillageStatistic extends Model
     use HasFactory;
 
     protected $fillable = [
-        'desa_id',
+        'village_id',
         'statistic_type_id',
         'indicator_name',
         'value',
@@ -31,7 +31,7 @@ class VillageStatistic extends Model
 
     public function village(): BelongsTo
     {
-        return $this->belongsTo(Village::class, 'desa_id');
+        return $this->belongsTo(Village::class, 'village_id');
     }
 
     public function statisticType(): BelongsTo

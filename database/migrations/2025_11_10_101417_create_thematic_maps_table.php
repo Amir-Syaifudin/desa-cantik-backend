@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('thematic_maps', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('desa_id')->constrained('desa')->onDelete('cascade');
+            $table->foreignId('village_id')->constrained('villages')->onDelete('cascade');
             $table->string('map_name', 255);
             $table->string('map_type', 100)->comment('Ekonomi / Pendidikan / Kesehatan / Pariwisata / dll');
             $table->text('description')->nullable();

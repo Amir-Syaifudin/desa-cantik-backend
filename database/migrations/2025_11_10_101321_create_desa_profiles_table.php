@@ -8,23 +8,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('desa_profiles', function (Blueprint $table) {
+        // Tabel 'village_profiles'
+        Schema::create('village_profiles', function (Blueprint $table) {
             $table->id();
-            // Standardisasi menggunakan 'desa_id' dan tabel 'desa'
-            $table->foreignId('desa_id')
-                  ->unique()
-                  ->constrained('desa')
-                  ->onDelete('cascade');
-                  
+            // Foreign Key 'village_id' ke tabel 'villages'
+            $table->foreignId('village_id')->unique()->constrained('villages')->onDelete('cascade');
+            
             $table->text('deskripsi')->nullable();
             $table->text('sejarah')->nullable();
             $table->text('visi')->nullable();
             $table->text('misi')->nullable();
             
-            // --- Kolom Tambahan (Gabungan dari file yang dihapus) ---
+            // Kolom tambahan (area, population, dll)
             $table->decimal('area', 10, 2)->nullable();
             $table->unsignedBigInteger('population')->nullable();
-            $table->unsignedInteger('households')->nullable(); // Jumlah KK
+            $table->unsignedInteger('households')->nullable();
             $table->unsignedInteger('male_population')->nullable();
             $table->unsignedInteger('female_population')->nullable();
             $table->decimal('population_density', 10, 2)->nullable();
@@ -36,8 +34,7 @@ return new class extends Migration
             $table->boolean('is_featured')->default(false);
             $table->string('thumbnail_url', 500)->nullable();
             $table->string('foto_url', 500)->nullable();
-            // --------------------------------------------------------
-
+            
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
@@ -45,6 +42,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('desa_profiles');
+        Schema::dropIfExists('village_profiles');
     }
 };

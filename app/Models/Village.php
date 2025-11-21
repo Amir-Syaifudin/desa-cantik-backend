@@ -9,16 +9,19 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read VillageProfile|null $profile
+ */
 class Village extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
-    protected $table = 'desa';
+    protected $table = 'villages';
 
     protected $fillable = [
-        'kode_desa',
-        'nama_desa',
+        'village_code',
+        'name',
         'kecamatan',
         'kabupaten',
         'provinsi',
@@ -30,46 +33,44 @@ class Village extends Model
         'is_visible' => 'boolean',
     ];
 
-    // Update relasi foreign key ke 'desa_id'
     public function users(): HasMany
     {
-        return $this->hasMany(User::class, 'desa_id');
+        return $this->hasMany(User::class, 'village_id');
     }
 
     public function statistics(): HasMany
     {
-        return $this->hasMany(VillageStatistic::class, 'desa_id');
+        return $this->hasMany(VillageStatistic::class, 'village_id');
     }
 
     public function publications(): HasMany
     {
-        return $this->hasMany(Publication::class, 'desa_id');
+        return $this->hasMany(Publication::class, 'village_id');
     }
 
     public function geospatialData(): HasMany
     {
-        return $this->hasMany(GeospatialData::class, 'desa_id');
+        return $this->hasMany(GeospatialData::class, 'village_id');
     }
 
     public function thematicMaps(): HasMany
     {
-        return $this->hasMany(ThematicMap::class, 'desa_id');
+        return $this->hasMany(ThematicMap::class, 'village_id');
     }
 
     public function modules(): HasMany
     {
-        return $this->hasMany(Module::class, 'desa_id');
+        return $this->hasMany(Module::class, 'village_id');
     }
 
     public function profile(): HasOne
     {
-        // Update foreign key
-        return $this->hasOne(VillageProfile::class, 'desa_id');
+        return $this->hasOne(VillageProfile::class, 'village_id');
     }
 
     public function activityLogs(): HasMany
     {
-        return $this->hasMany(ActivityLog::class, 'desa_id');
+        return $this->hasMany(ActivityLog::class, 'village_id');
     }
 
     public function mapPoints(): HasManyThrough
@@ -77,7 +78,7 @@ class Village extends Model
         return $this->hasManyThrough(
             MapPoint::class,
             ThematicMap::class,
-            'desa_id',
+            'village_id',
             'thematic_map_id',
             'id',
             'id'

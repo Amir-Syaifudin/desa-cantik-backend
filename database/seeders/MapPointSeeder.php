@@ -22,7 +22,7 @@ class MapPointSeeder extends Seeder
         }
 
         foreach ($villages as $village) {
-            $thematicMaps = ThematicMap::where('desa_id', $village->id)->get();
+            $thematicMaps = ThematicMap::where('village_id', $village->id)->get();
 
             if ($thematicMaps->isEmpty()) {
                 $this->command->warn("No thematic maps found for village {$village->name}. Please run ThematicMapSeeder first.");

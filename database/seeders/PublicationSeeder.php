@@ -94,11 +94,11 @@ class PublicationSeeder extends Seeder
             foreach ($publications as $pub) {
                 Publication::updateOrCreate(
                     [
-                        'desa_id' => $village->id,
+                        'village_id' => $village->id,
                         'title' => $pub['title'],
                     ],
                     array_merge($pub, [
-                        'desa_id' => $village->id,
+                        'village_id' => $village->id,
                         'uploaded_by' => $admin->id,
                     ])
                 );

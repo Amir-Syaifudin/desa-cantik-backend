@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('publications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('desa_id')->constrained('desa')->onDelete('cascade');
+            $table->foreignId('village_id')->constrained('villages')->onDelete('cascade');
             $table->string('title', 255);
             $table->text('description')->nullable();
             $table->string('file_url', 500);

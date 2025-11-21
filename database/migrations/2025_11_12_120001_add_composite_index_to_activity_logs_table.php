@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('activity_logs', function (Blueprint $table) {
             // Add composite index for village-specific activity log queries
             // This improves performance when fetching recent activities for a village
-            $table->index(['desa_id', 'created_at'], 'activity_logs_village_created_index');
+            $table->index(['village_id', 'created_at'], 'activity_logs_village_created_index');
         });
     }
 

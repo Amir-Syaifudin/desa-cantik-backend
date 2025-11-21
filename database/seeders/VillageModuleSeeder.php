@@ -24,7 +24,7 @@ class VillageModuleSeeder extends Seeder
             foreach ($defaultModules as $module) {
                 Module::updateOrCreate(
                     [
-                        'desa_id' => $village->id,
+                        'village_id' => $village->id,
                         'module_name' => $module['module_name'], // GANTI 'nama_desa' JADI 'module_name'
                     ],
                     [

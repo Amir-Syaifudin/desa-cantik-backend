@@ -13,11 +13,11 @@ return new class extends Migration
         }
 
         Schema::table('activity_logs', function (Blueprint $table) {
-            if (Schema::hasColumn('activity_logs', 'desa_id')) {
-                $table->dropForeign(['desa_id']);
-                $table->foreign('desa_id')
+            if (Schema::hasColumn('activity_logs', 'village_id')) {
+                $table->dropForeign(['village_id']);
+                $table->foreign('village_id')
                     ->references('id')
-                    ->on('desa')
+                    ->on('villages')
                     ->nullOnDelete();
             }
         });
@@ -30,11 +30,11 @@ return new class extends Migration
         }
 
         Schema::table('activity_logs', function (Blueprint $table) {
-            if (Schema::hasColumn('activity_logs', 'desa_id')) {
-                $table->dropForeign(['desa_id']);
-                $table->foreign('desa_id')
+            if (Schema::hasColumn('activity_logs', 'village_id')) {
+                $table->dropForeign(['village_id']);
+                $table->foreign('village_id')
                     ->references('id')
-                    ->on('desa')
+                    ->on('villages')
                     ->nullOnDelete();
             }
         });
