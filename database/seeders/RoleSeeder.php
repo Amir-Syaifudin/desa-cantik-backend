@@ -26,8 +26,14 @@ class RoleSeeder extends Seeder
             ],
         ];
 
-        DB::table('roles')->insert($roles);
-        $this->command->info('✅ 2 roles created (bps_admin, village_officer)');
+        foreach ($roles as $role) {
+            DB::table('roles')->updateOrInsert(
+                ['role_name' => $role['role_name']],
+                $role
+            );
+        }
+
+        $this->command->info('✅ 2 roles created/updated (bps_admin, village_officer)');
         $this->command->info('Note: Guest/public users do not require a role or authentication');
     }
 }
