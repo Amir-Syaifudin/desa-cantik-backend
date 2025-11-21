@@ -209,11 +209,17 @@ class PublicationController extends Controller
 
         $fileMeta = $this->publicationService->storeFile($request->file('file'), $village);
 
+        $status = $request->input('status');
+        if ($status === 'Rilis') $status = 'Terverifikasi';
+        if ($status === 'Diarsipkan') $status = 'Draft';
+
         $publication = Publication::create([
             'desa_id' => $village->id,
             'title' => $request->input('title'),
             'description' => $request->input('description'),
             'published_at' => $request->input('published_at'),
+            'category' => $request->input('category'),
+            'status' => $status ?? 'Draft',
             'uploaded_by' => $user->id,
             'file_path' => $fileMeta['file_path'],
             'file_name' => $fileMeta['file_name'],
@@ -245,6 +251,12 @@ class PublicationController extends Controller
         $this->ensurePublicationBelongsToVillage($publication, $village);
 
         $data = $request->validated();
+
+        if (isset($data['status'])) {
+            if ($data['status'] === 'Rilis') $data['status'] = 'Terverifikasi';
+            if ($data['status'] === 'Diarsipkan') $data['status'] = 'Draft';
+        }
+
         $original = $publication->toArray();
         $publication->fill($data);
         $publication->save();
@@ -340,6 +352,52 @@ class PublicationController extends Controller
                 'Content-Type' => $mimeType,
             ]
         );
+    }
+
+    /**
+     * Get publication metadata (categories and statuses)
+     */
+    #[OA\Get(
+        path: '/api/v1/publications/metadata',
+        summary: 'Get publication metadata',
+        description: 'Returns available categories and statuses for publications',
+        tags: ['Publications']
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Metadata retrieved successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'boolean', example: true),
+                new OA\Property(property: 'data', type: 'object', properties: [
+                    new OA\Property(property: 'categories', type: 'array', items: new OA\Items(type: 'string')),
+                    new OA\Property(property: 'statuses', type: 'array', items: new OA\Items(type: 'string')),
+                ])
+            ]
+        )
+    )]
+    public function metadata(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'categories' => [
+                    'Statistik Desa',
+                    'Sosial',
+                    'Ekonomi Lokal',
+                    'Pemerintahan',
+                    'Infrastruktur',
+                    'Pendidikan',
+                    'Kesehatan',
+                ],
+                'statuses' => [
+                    'Draft',
+                    'Perlu Validasi',
+                    'Terverifikasi',
+                    'Batal Terbit',
+                ],
+            ],
+        ]);
     }
 
     protected function ensurePublicationBelongsToVillage(Publication $publication, Village $village): void

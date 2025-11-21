@@ -62,6 +62,7 @@ class VillageProfileController extends Controller
             'data' => [
                 'id' => $profile->id,
                 'village_id' => $profile->village_id,
+                'name' => $village->name,
                 'description' => $profile->deskripsi,
                 'vision' => $profile->visi,
                 'mission' => $profile->misi ? json_decode($profile->misi, true) : [],
@@ -73,6 +74,7 @@ class VillageProfileController extends Controller
                 'email' => $profile->email,
                 'website' => $profile->website,
                 'logo_url' => $profile->logo_url,
+                'image_url' => $profile->logo_url,
                 'created_at' => $profile->created_at,
                 'updated_at' => $profile->updated_at,
             ],
@@ -151,6 +153,7 @@ class VillageProfileController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string',
             'description' => 'sometimes|string',
             'vision' => 'sometimes|string',
             'mission' => 'sometimes|array',
@@ -161,6 +164,7 @@ class VillageProfileController extends Controller
             'email' => 'nullable|email',
             'website' => 'nullable|url',
             'logo_url' => 'nullable|url',
+            'logo' => 'nullable|file|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -180,6 +184,10 @@ class VillageProfileController extends Controller
         $oldData = $profile->toArray();
 
         // Map spec fields to model fields
+        if ($request->has('name')) {
+            $village->name = $request->name;
+            $village->save();
+        }
         if ($request->has('description')) {
             $profile->deskripsi = $request->description;
         }
@@ -211,6 +219,11 @@ class VillageProfileController extends Controller
             $profile->logo_url = $request->logo_url;
         }
 
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('village-logos', 'public');
+            $profile->logo_url = Storage::url($path);
+        }
+
         $profile->updated_by = $user->id;
 
         // Calculate population density if both area and population are set
@@ -231,6 +244,7 @@ class VillageProfileController extends Controller
             'data' => [
                 'id' => $profile->id,
                 'village_id' => $profile->village_id,
+                'name' => $village->name,
                 'description' => $profile->deskripsi,
                 'vision' => $profile->visi,
                 'mission' => $profile->misi ? json_decode($profile->misi, true) : [],
@@ -242,6 +256,7 @@ class VillageProfileController extends Controller
                 'email' => $profile->email,
                 'website' => $profile->website,
                 'logo_url' => $profile->logo_url,
+                'image_url' => $profile->logo_url,
             ],
         ]);
     }

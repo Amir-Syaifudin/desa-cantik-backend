@@ -33,10 +33,12 @@ class UpdateVillageStatisticRequest extends FormRequest
             'indicator_name' => ['sometimes', 'required', 'string', 'max:255'],
             'value' => ['sometimes', 'required', 'numeric'],
             'unit' => ['sometimes', 'nullable', 'string', 'max:50'],
-            'year' => ['sometimes', 'required', 'integer', 'min:2000', 'max:'.$maxYear],
+            'year' => ['sometimes', 'required', 'integer', 'min:2000', 'max:' . $maxYear],
             'period' => ['sometimes', 'nullable', 'string', 'max:50'],
             'source' => ['sometimes', 'nullable', 'string', 'max:255'],
             'notes' => ['sometimes', 'nullable', 'string'],
+            'status' => ['sometimes', 'nullable', 'string', 'max:50'],
+            'file' => ['sometimes', 'nullable', 'file', 'max:10240'],
         ];
     }
 

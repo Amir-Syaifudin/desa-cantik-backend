@@ -20,16 +20,20 @@ class ThematicMapController extends Controller
         $village = Village::findOrFail($villageId);
 
         $maps = ThematicMap::where('desa_id', $village->id)
-            ->with('mapPoints:id,thematic_map_id,name,latitude,longitude,category')
             ->get()
             ->map(function ($map) {
+                $config = $map->layer_config ?? [];
                 return [
                     'id' => $map->id,
                     'village_id' => $map->desa_id,
+                    'name' => $map->map_name,
+                    'geoId' => $config['geospatial_data_id'] ?? null,
+                    'color' => $config['color'] ?? '#000000',
+                    'isVisible' => (bool) $map->is_active,
                     'theme_name' => $map->map_name,
                     'description' => $map->description,
                     'icon' => $map->map_type,
-                    'points_count' => $map->mapPoints->count(),
+                    'points_count' => $map->mapPoints()->count(),
                     'created_at' => $map->created_at,
                     'updated_at' => $map->updated_at,
                 ];
@@ -97,9 +101,10 @@ class ThematicMapController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'theme_name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'icon' => 'nullable|string|max:100',
+            'name' => 'required|string|max:255',
+            'geoId' => 'required|integer',
+            'color' => 'required|string',
+            'isVisible' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -112,10 +117,14 @@ class ThematicMapController extends Controller
 
         $map = ThematicMap::create([
             'desa_id' => $village->id,
-            'map_name' => $request->theme_name,
+            'map_name' => $request->name,
             'description' => $request->description,
-            'map_type' => $request->icon ?? 'default',
-            'is_active' => true,
+            'map_type' => 'layer',
+            'is_active' => $request->input('isVisible', true),
+            'layer_config' => [
+                'geospatial_data_id' => $request->geoId,
+                'color' => $request->color,
+            ],
             'created_by' => $user->id,
         ]);
 
@@ -127,9 +136,10 @@ class ThematicMapController extends Controller
             'data' => [
                 'id' => $map->id,
                 'village_id' => $map->desa_id,
-                'theme_name' => $map->map_name,
-                'description' => $map->description,
-                'icon' => $map->map_type,
+                'name' => $map->map_name,
+                'geoId' => $request->geoId,
+                'color' => $request->color,
+                'isVisible' => $map->is_active,
             ],
         ], 201);
     }
@@ -154,9 +164,10 @@ class ThematicMapController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'theme_name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'icon' => 'nullable|string|max:100',
+            'name' => 'sometimes|string|max:255',
+            'geoId' => 'sometimes|integer',
+            'color' => 'sometimes|string',
+            'isVisible' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -169,15 +180,21 @@ class ThematicMapController extends Controller
 
         $oldData = $map->toArray();
 
-        if ($request->has('theme_name')) {
-            $map->map_name = $request->theme_name;
+        if ($request->has('name')) {
+            $map->map_name = $request->name;
         }
-        if ($request->has('description')) {
-            $map->description = $request->description;
+        if ($request->has('isVisible')) {
+            $map->is_active = $request->isVisible;
         }
-        if ($request->has('icon')) {
-            $map->map_type = $request->icon;
+
+        $config = $map->layer_config ?? [];
+        if ($request->has('geoId')) {
+            $config['geospatial_data_id'] = $request->geoId;
         }
+        if ($request->has('color')) {
+            $config['color'] = $request->color;
+        }
+        $map->layer_config = $config;
 
         $map->save();
 
@@ -192,9 +209,10 @@ class ThematicMapController extends Controller
             'data' => [
                 'id' => $map->id,
                 'village_id' => $map->desa_id,
-                'theme_name' => $map->map_name,
-                'description' => $map->description,
-                'icon' => $map->map_type,
+                'name' => $map->map_name,
+                'geoId' => $config['geospatial_data_id'] ?? null,
+                'color' => $config['color'] ?? null,
+                'isVisible' => $map->is_active,
             ],
         ]);
     }

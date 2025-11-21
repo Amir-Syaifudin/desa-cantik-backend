@@ -20,6 +20,8 @@ class DashboardStatisticsService
         return Cache::remember('dashboard:admin', config('dashboard.cache_ttl'), function () {
             return [
                 'summary' => $this->adminSummary(),
+                'publication_status' => $this->publicationStatus(),
+                'publication_categories' => $this->publicationCategories(),
                 'recent_activities' => $this->recentActivities(),
                 'villages_statistics' => $this->villageStatisticsOverview(),
                 'monthly_activities' => $this->monthlyActivities(),
@@ -50,6 +52,7 @@ class DashboardStatisticsService
                 'summary' => $this->villageSummary($village),
                 'recent_activities' => $this->recentActivities($village->id),
                 'statistics_by_category' => $this->statisticsByCategory($village),
+                'publication_status' => $this->publicationStatusByVillage($village->id),
                 'profile_completeness' => $this->profileCompleteness($village->profile),
             ];
         });
@@ -88,12 +91,12 @@ class DashboardStatisticsService
     protected function recentActivities(?int $villageId = null): array
     {
         return ActivityLog::query()
-            ->when($villageId, fn ($query) => $query->where('village_id', $villageId))
+            ->when($villageId, fn($query) => $query->where('village_id', $villageId))
             ->orderByDesc('created_at')
             ->limit(10)
             ->with('user:id,full_name,username')
             ->get()
-            ->map(fn (ActivityLog $log) => [
+            ->map(fn(ActivityLog $log) => [
                 'id' => $log->id,
                 'user' => $log->user?->full_name ?? $log->user?->username ?? 'System',
                 'action' => $log->action,
@@ -118,7 +121,7 @@ class DashboardStatisticsService
             $publicationsUpdatedAt = $village->publications_max_updated_at ?? null;
             $lastUpdated = collect([$statisticsUpdatedAt, $publicationsUpdatedAt])
                 ->filter()
-                ->map(fn ($value) => Carbon::parse($value))
+                ->map(fn($value) => Carbon::parse($value))
                 ->max();
 
             return [
@@ -151,7 +154,7 @@ class DashboardStatisticsService
             ->limit(6)
             ->get();
 
-        return $rows->map(fn ($row) => [
+        return $rows->map(fn($row) => [
             'month' => $row->month,
             'statistics_created' => (int) $row->statistics_created,
             'statistics_updated' => (int) $row->statistics_updated,
@@ -175,7 +178,7 @@ class DashboardStatisticsService
             $village->statistics()->max('updated_at'),
             $village->publications()->max('updated_at'),
             $village->thematicMaps()->max('updated_at'),
-        ])->filter()->map(fn ($timestamp) => Carbon::parse($timestamp))->max();
+        ])->filter()->map(fn($timestamp) => Carbon::parse($timestamp))->max();
 
         return [
             'total_statistics' => $village->statistics->count(),
@@ -196,7 +199,7 @@ class DashboardStatisticsService
             ->groupBy('statistic_types.category')
             ->get();
 
-        return $rows->map(fn ($row) => [
+        return $rows->map(fn($row) => [
             'category' => $row->category,
             'count' => (int) $row->count,
         ])->toArray();
@@ -237,7 +240,9 @@ class DashboardStatisticsService
             'total_villages' => Village::where('is_visible', true)->count(),
             'total_statistics' => VillageStatistic::count(),
             'total_publications' => Publication::count(),
+            // Provide both last_updated and last_update to satisfy frontend expectations
             'last_updated' => VillageStatistic::max('updated_at')?->toISOString(),
+            'last_update' => VillageStatistic::max('updated_at')?->toISOString(),
         ];
     }
 
@@ -267,7 +272,7 @@ class DashboardStatisticsService
             ->orderByDesc('published_at')
             ->limit(5)
             ->get()
-            ->map(fn (Publication $publication) => [
+            ->map(fn(Publication $publication) => [
                 'id' => $publication->id,
                 'title' => $publication->title,
                 'village_name' => $publication->village?->name,
@@ -284,7 +289,7 @@ class DashboardStatisticsService
 
         foreach ($codes as $key => $code) {
             $value = VillageStatistic::query()
-                ->whereHas('statisticType', fn ($query) => $query->where('code', $code))
+                ->whereHas('statisticType', fn($query) => $query->where('code', $code))
                 ->orderByDesc('year')
                 ->limit(1)
                 ->value('value');
@@ -293,5 +298,80 @@ class DashboardStatisticsService
         }
 
         return $results;
+    }
+
+    protected function publicationStatus(): array
+    {
+        return Publication::query()
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'status' => $item->status,
+                    'count' => (int) $item->count,
+                    'color' => $this->getStatusColor($item->status),
+                ];
+            })
+            ->toArray();
+    }
+
+    protected function publicationCategories(): array
+    {
+        return Publication::query()
+            ->selectRaw('category, COUNT(*) as count')
+            ->whereNotNull('category')
+            ->groupBy('category')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'category' => $item->category,
+                    'count' => (int) $item->count,
+                    'color' => $this->getCategoryColor($item->category),
+                ];
+            })
+            ->toArray();
+    }
+
+    protected function getStatusColor(string $status): string
+    {
+        return match ($status) {
+            'Terverifikasi' => '#22c55e',
+            'Perlu Validasi' => '#f59e0b',
+            'Draft' => '#6b7280',
+            'Batal Terbit' => '#ef4444',
+            default => '#6b7280',
+        };
+    }
+
+    protected function getCategoryColor(string $category): string
+    {
+        $colors = [
+            'Demografi' => '#22c55e',
+            'Ekonomi' => '#3b82f6',
+            'Pendidikan' => '#f59e0b',
+            'Kesehatan' => '#14b8a6',
+            'Pertanian' => '#8b5cf6',
+            'Pemerintahan' => '#f97316',
+        ];
+
+        return $colors[$category] ?? '#6b7280';
+    }
+
+    protected function publicationStatusByVillage(int $villageId): array
+    {
+        return Publication::query()
+            ->where('village_id', $villageId)
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'status' => $item->status,
+                    'count' => (int) $item->count,
+                    'color' => $this->getStatusColor($item->status),
+                ];
+            })
+            ->toArray();
     }
 }

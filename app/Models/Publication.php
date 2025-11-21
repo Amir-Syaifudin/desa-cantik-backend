@@ -23,6 +23,7 @@ class Publication extends Model
         'file_size_bytes',
         'published_at',
         'uploaded_by',
+        'status',
         // Legacy columns retained for future reference / backward compatibility
         'category',
         'file_url',

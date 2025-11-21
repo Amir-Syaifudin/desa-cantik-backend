@@ -5,11 +5,14 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\GeospatialDataController;
 use App\Http\Controllers\Api\MapPointController;
+use App\Http\Controllers\Api\ProgramContentController;
 use App\Http\Controllers\Api\PublicationController;
+use App\Http\Controllers\Api\StatisticFlowController;
 use App\Http\Controllers\Api\StatisticTypeController;
 use App\Http\Controllers\Api\ThematicMapController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VillageController;
+use App\Http\Controllers\Api\VillageDocumentationController;
 use App\Http\Controllers\Api\VillageModuleController;
 use App\Http\Controllers\Api\VillageProfileController;
 use App\Http\Controllers\Api\VillageStatisticController;
@@ -31,11 +34,15 @@ Route::prefix('v1')->group(function () {
     // ===============================================
     Route::get('statistic-types', [StatisticTypeController::class, 'index']);
     Route::get('dashboard/public', [DashboardController::class, 'public']);
+    Route::get('program/content', [ProgramContentController::class, 'show']);
+    Route::get('publications/metadata', [PublicationController::class, 'metadata']);
+    Route::get('statistics/validation-flow', [StatisticFlowController::class, 'show']);
 
     // Villages (Public)
     Route::get('villages', [VillageController::class, 'index']);
     Route::get('villages/{id}', [VillageController::class, 'show']);
     Route::get('villages/{village_id}/profile', [VillageProfileController::class, 'show']);
+    Route::get('villages/{village_id}/documentation', [VillageDocumentationController::class, 'index']);
 
     // Geospatial Data (Public reads)
     Route::get('villages/{village_id}/geospatial', [GeospatialDataController::class, 'index']);
