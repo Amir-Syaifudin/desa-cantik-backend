@@ -99,6 +99,7 @@ Route::prefix('v1')->group(function () {
             Route::put('villages/{id}', [VillageController::class, 'update']);
             Route::delete('villages/{id}', [VillageController::class, 'destroy']);
             Route::put('villages/{id}/toggle-status', [VillageController::class, 'toggleStatus']);
+            Route::get('villages/{id}/documentation', [VillageController::class, 'documentation']);
         });
 
         // Village Statistics Management (Protected)
