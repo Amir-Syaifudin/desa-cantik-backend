@@ -10,10 +10,11 @@ class VillageProfile extends Model
 {
     use HasFactory;
 
-    protected $table = 'village_profiles';
+    // Sesuaikan nama tabel
+    protected $table = 'desa_profiles';
 
     protected $fillable = [
-        'village_id',
+        'desa_id', 
         'deskripsi',
         'sejarah',
         'visi',
@@ -47,6 +48,7 @@ class VillageProfile extends Model
 
     public function village(): BelongsTo
     {
-        return $this->belongsTo(Village::class, 'village_id');
+        // Update foreign key
+        return $this->belongsTo(Village::class, 'desa_id');
     }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('village_statistics', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('village_id')->constrained('desa')->cascadeOnDelete();
+            $table->foreignId('desa_id')->constrained('desa')->cascadeOnDelete();
             $table->foreignId('statistic_type_id')->constrained('statistic_types')->restrictOnDelete();
             $table->string('indicator_name', 255);
             $table->decimal('value', 20, 4);
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
-            $table->index('village_id', 'village_statistics_village_id_index');
+            $table->index('desa_id', 'village_statistics_village_id_index');
             $table->index('statistic_type_id', 'village_statistics_stat_type_index');
             $table->index('year', 'village_statistics_year_index');
             $table->index('created_by', 'village_statistics_created_by_index');

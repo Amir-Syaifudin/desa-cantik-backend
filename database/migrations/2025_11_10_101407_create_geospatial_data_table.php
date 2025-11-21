@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('geometry_type', 50)->comment('Polygon / Point / LineString');
             $table->json('geojson_data')->comment('GeoJSON geometry data');
             $table->text('description')->nullable();
+            $table->json('properties')->nullable();
             $table->foreignId('uploaded_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });

@@ -12,7 +12,7 @@ class ActivityLog extends Model
 
     protected $fillable = [
         'user_id',
-        'village_id',
+        'desa_id',
         'action',
         'model_type',
         'model_id',
@@ -35,6 +35,6 @@ class ActivityLog extends Model
 
     public function village(): BelongsTo
     {
-        return $this->belongsTo(Village::class, 'village_id');
+        return $this->belongsTo(Village::class, 'desa_id');
     }
 }

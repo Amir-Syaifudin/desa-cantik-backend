@@ -17,7 +17,6 @@ class GeospatialData extends Model
         'desa_id',
         'geometry_type',
         'geojson_data',
-        'properties',
         'description',
         'uploaded_by',
     ];

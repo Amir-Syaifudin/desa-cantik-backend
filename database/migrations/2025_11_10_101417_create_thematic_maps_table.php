@@ -14,6 +14,10 @@ return new class extends Migration
             $table->string('map_name', 255);
             $table->string('map_type', 100)->comment('Ekonomi / Pendidikan / Kesehatan / Pariwisata / dll');
             $table->text('description')->nullable();
+            $table->foreignId('geospatial_data_id')
+            ->nullable()
+            ->constrained('geospatial_data')
+            ->nullOnDelete();
             $table->json('layer_config')->nullable()->comment('Konfigurasi layer (warna, opacity, dll)');
             $table->boolean('is_active')->default(true);
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');

@@ -85,7 +85,7 @@ class VillageStatisticSeeder extends Seeder
 
                     VillageStatistic::updateOrCreate(
                         [
-                            'village_id' => $village->id,
+                            'desa_id' => $village->id,
                             'statistic_type_id' => $statType->id,
                             'year' => $year,
                         ],

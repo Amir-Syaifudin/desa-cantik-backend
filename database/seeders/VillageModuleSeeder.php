@@ -8,39 +8,33 @@ use Illuminate\Database\Seeder;
 
 class VillageModuleSeeder extends Seeder
 {
-    /**
-     * Seed village modules (activate modules per village)
-     */
     public function run(): void
     {
         $villages = Village::all();
 
-        if ($villages->isEmpty()) {
-            $this->command->warn('No villages found. Please run VillageSeeder first.');
-            return;
-        }
-
-        $modules = [
-            'Publikasi',
-            'Statistik',
-            'Peta Tematik',
+        // Daftar modul standar untuk setiap desa
+        $defaultModules = [
+            ['module_name' => 'Publikasi', 'is_active' => true],
+            ['module_name' => 'Statistik', 'is_active' => true],
+            ['module_name' => 'Peta Tematik', 'is_active' => true],
+            ['module_name' => 'Layanan Mandiri', 'is_active' => false],
         ];
 
         foreach ($villages as $village) {
-            foreach ($modules as $moduleName) {
+            foreach ($defaultModules as $module) {
                 Module::updateOrCreate(
                     [
-                        'village_id' => $village->id,
-                        'name' => $moduleName,
+                        'desa_id' => $village->id,
+                        'module_name' => $module['module_name'], // GANTI 'nama_desa' JADI 'module_name'
                     ],
                     [
-                        'status' => 'active',
+                        'is_active' => $module['is_active'],
+                        'activated_at' => $module['is_active'] ? now() : null,
                     ]
                 );
             }
         }
 
-        $this->command->info('✓ ' . Module::count() . ' village modules created');
+        $this->command->info('✓ Village modules seeded successfully');
     }
 }
-

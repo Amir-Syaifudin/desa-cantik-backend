@@ -22,7 +22,7 @@ class User extends Authenticatable
         'phone_number',
         'password',
         'role_id',
-        'village_id',
+        'desa_id',
         'is_active',
         'email_verified_at',
     ];
@@ -48,7 +48,7 @@ class User extends Authenticatable
 
     public function village(): BelongsTo
     {
-        return $this->belongsTo(Village::class, 'village_id');
+        return $this->belongsTo(Village::class, 'desa_id');
     }
 
     public function activityLogs(): HasMany

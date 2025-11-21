@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\ThematicMap;
 use App\Models\Village;
-use App\Models\GeospatialData; // Pastikan import ini ada
+use App\Models\GeospatialData;
 use Illuminate\Database\Seeder;
 
 class ThematicMapSeeder extends Seeder
@@ -19,27 +19,19 @@ class ThematicMapSeeder extends Seeder
         }
 
         foreach ($villages as $village) {
-            // 1. Cari Data Geospasial milik Desa ini
-            $geoBatas = GeospatialData::where('desa_id', $village->id)
-                        ->where('description', 'Batas Wilayah Desa')
-                        ->first();
-            
-            $geoSekolah = GeospatialData::where('desa_id', $village->id)
-                        ->where('description', 'Titik Lokasi Sekolah')
-                        ->first();
+            // 1. Ambil ID Geospatial Data yang sudah di-seed sebelumnya
+            // Pastikan deskripsi di sini SAMA PERSIS dengan yang ada di GeospatialDataSeeder
+            $geoBatas = GeospatialData::where('desa_id', $village->id)->where('description', 'Batas Wilayah Desa')->first();
+            $geoSekolah = GeospatialData::where('desa_id', $village->id)->where('description', 'Titik Lokasi Sekolah')->first();
+            $geoSungai = GeospatialData::where('desa_id', $village->id)->where('description', 'Jaringan Sungai')->first();
 
-            $geoSungai = GeospatialData::where('desa_id', $village->id)
-                        ->where('description', 'Jaringan Sungai')
-                        ->first();
-
-            // 2. Buat Peta Tematik yang terhubung
             $maps = [
                 [
-                    'desa_id' => $village->id,
+                    'desa_id' => $village->id, // Sesuai migration thematic_maps
                     'map_name' => 'Peta Kepadatan Penduduk',
                     'map_type' => 'Demografi',
                     'description' => 'Visualisasi kepadatan penduduk per wilayah',
-                    // Hubungkan dengan Polygon Batas Desa
+                    // PENTING: Ini kolom baru yang kita tambahkan
                     'geospatial_data_id' => $geoBatas?->id, 
                     'layer_config' => [
                         'color' => '#FF0000',
@@ -56,7 +48,6 @@ class ThematicMapSeeder extends Seeder
                     'map_name' => 'Peta Sebaran Sekolah',
                     'map_type' => 'Pendidikan',
                     'description' => 'Lokasi sekolah dan fasilitas pendidikan',
-                    // Hubungkan dengan Point Sekolah
                     'geospatial_data_id' => $geoSekolah?->id,
                     'layer_config' => [
                         'color' => '#0000FF',
@@ -69,7 +60,6 @@ class ThematicMapSeeder extends Seeder
                     'map_name' => 'Peta Potensi Perairan',
                     'map_type' => 'Lingkungan',
                     'description' => 'Jalur aliran sungai utama',
-                    // Hubungkan dengan LineString Sungai
                     'geospatial_data_id' => $geoSungai?->id,
                     'layer_config' => [
                         'color' => '#00FF00',
@@ -80,6 +70,7 @@ class ThematicMapSeeder extends Seeder
             ];
 
             foreach ($maps as $mapData) {
+                // Gunakan updateOrCreate agar tidak duplikat saat seed ulang
                 ThematicMap::updateOrCreate(
                     [
                         'desa_id' => $mapData['desa_id'],

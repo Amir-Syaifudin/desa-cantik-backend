@@ -12,8 +12,8 @@ class VillageSeeder extends Seeder
     {
         $villages = [
             [
-                'village_code' => '7316010001',
-                'name' => 'Nonongan Selatan',
+                'kode_desa' => '7316010001', // GANTI KEY
+                'nama_desa' => 'Nonongan Selatan', // GANTI KEY
                 'kecamatan' => 'Rantepao',
                 'kabupaten' => 'Toraja Utara',
                 'provinsi' => 'Sulawesi Selatan',
@@ -38,8 +38,8 @@ class VillageSeeder extends Seeder
                 ],
             ],
             [
-                'village_code' => '7316010002',
-                'name' => 'Rindingbatu',
+                'kode_desa' => '7316010002', // GANTI KEY
+                'nama_desa' => 'Rindingbatu', // GANTI KEY
                 'kecamatan' => 'Rantepao',
                 'kabupaten' => 'Toraja Utara',
                 'provinsi' => 'Sulawesi Selatan',
@@ -69,18 +69,20 @@ class VillageSeeder extends Seeder
             $profileData = $village['profile'] ?? null;
             unset($village['profile']);
 
+            // Gunakan 'kode_desa'
             $villageModel = Village::updateOrCreate(
-                ['village_code' => $village['village_code']],
+                ['kode_desa' => $village['kode_desa']],
                 $village
             );
 
             if ($profileData) {
-                $profileData['village_id'] = $villageModel->id;
+                // Gunakan 'desa_id'
+                $profileData['desa_id'] = $villageModel->id;
                 $profileData['population_density'] = $profileData['population_density']
                     ?? ($profileData['area'] ? round($profileData['population'] / $profileData['area'], 2) : null);
 
                 VillageProfile::updateOrCreate(
-                    ['village_id' => $villageModel->id],
+                    ['desa_id' => $villageModel->id],
                     $profileData
                 );
             }

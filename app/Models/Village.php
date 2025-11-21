@@ -9,19 +9,16 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * @property-read VillageProfile|null $profile
- */
 class Village extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
-    protected $table = 'villages';
+    protected $table = 'desa';
 
     protected $fillable = [
-        'village_code',
-        'name',
+        'kode_desa',
+        'nama_desa',
         'kecamatan',
         'kabupaten',
         'provinsi',
@@ -33,14 +30,15 @@ class Village extends Model
         'is_visible' => 'boolean',
     ];
 
+    // Update relasi foreign key ke 'desa_id'
     public function users(): HasMany
     {
-        return $this->hasMany(User::class, 'village_id');
+        return $this->hasMany(User::class, 'desa_id');
     }
 
     public function statistics(): HasMany
     {
-        return $this->hasMany(VillageStatistic::class, 'village_id');
+        return $this->hasMany(VillageStatistic::class, 'desa_id');
     }
 
     public function publications(): HasMany
@@ -65,12 +63,13 @@ class Village extends Model
 
     public function profile(): HasOne
     {
-        return $this->hasOne(VillageProfile::class, 'village_id');
+        // Update foreign key
+        return $this->hasOne(VillageProfile::class, 'desa_id');
     }
 
     public function activityLogs(): HasMany
     {
-        return $this->hasMany(ActivityLog::class, 'village_id');
+        return $this->hasMany(ActivityLog::class, 'desa_id');
     }
 
     public function mapPoints(): HasManyThrough

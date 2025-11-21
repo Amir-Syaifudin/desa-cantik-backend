@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
                 'full_name' => 'Administrator BPS Toraja Utara',
                 'phone_number' => '081234567890',
                 'role_id' => $bpsAdminRole->id,
-                'village_id' => null,
+                'desa_id' => null,
                 'is_active' => true,
             ]);
 
@@ -63,7 +63,7 @@ class UserSeeder extends Seeder
                     'full_name' => 'Perangkat Desa Nonongan Selatan',
                     'phone_number' => '081234567891',
                     'role_id' => $villageOfficerRole->id,
-                    'village_id' => $nonongan->id,
+                    'desa_id' => $nonongan->id,
                     'is_active' => true,
                 ]);
                 $this->command->info('✓ Village Officer created: nonongan@desacantik.id (password: password123)');
@@ -78,7 +78,7 @@ class UserSeeder extends Seeder
                     'full_name' => 'Perangkat Desa Rindingbatu',
                     'phone_number' => '081234567892',
                     'role_id' => $villageOfficerRole->id,
-                    'village_id' => $rindingbatu->id,
+                    'desa_id' => $rindingbatu->id,
                     'is_active' => true,
                 ]);
                 $this->command->info('✓ Village Officer created: rindingbatu@desacantik.id (password: password123)');
