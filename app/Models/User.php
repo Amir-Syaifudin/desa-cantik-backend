@@ -48,6 +48,7 @@ class User extends Authenticatable
 
     public function village(): BelongsTo
     {
+        // PERBAIKAN: Relasi ke tabel desa via village_id
         return $this->belongsTo(Village::class, 'village_id');
     }
 

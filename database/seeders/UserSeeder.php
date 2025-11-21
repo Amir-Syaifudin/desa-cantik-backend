@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Village;
 use Illuminate\Database\Seeder;
-// use Illuminate\Support\Facades\Hash; // Tidak perlu Hash facade jika model pakai cast 'hashed'
+// use Illuminate\Support\Facades\Hash; // Hapus import ini karena tidak dipakai
 
 class UserSeeder extends Seeder
 {
@@ -34,7 +34,7 @@ class UserSeeder extends Seeder
             User::create([
                 'username' => 'bps_admin',
                 'email' => 'admin@bps.go.id',
-                'password' => 'password123', // Kirim plain text, biarkan Model yang nge-hash
+                'password' => 'password123', // PERBAIKAN: Jangan di-hash manual! Model akan otomatis hash.
                 'full_name' => 'Administrator BPS Toraja Utara',
                 'phone_number' => '081234567890',
                 'role_id' => $bpsAdminRole->id,
@@ -48,18 +48,18 @@ class UserSeeder extends Seeder
         $villages = Village::all();
         
         if ($villages->count() > 0) {
-            // PERBAIKAN: Gunakan 'nama_desa' bukan 'name'
+            // PERBAIKAN: Gunakan 'nama_desa' untuk mencari
             $nonongan = $villages->firstWhere('nama_desa', 'Nonongan Selatan');
             
             if ($nonongan && ! User::where('email', 'nonongan@desacantik.id')->exists()) {
                 User::create([
                     'username' => 'perangkat_nonongan',
                     'email' => 'nonongan@desacantik.id',
-                    'password' => 'password123',
+                    'password' => 'password123', // PERBAIKAN: Plain text
                     'full_name' => 'Perangkat Desa Nonongan Selatan',
                     'phone_number' => '081234567891',
                     'role_id' => $villageOfficerRole->id,
-                    'village_id' => $nonongan->id, // Pastikan pakai village_id (sesuai model User)
+                    'village_id' => $nonongan->id, // PERBAIKAN: Gunakan village_id
                     'is_active' => true,
                 ]);
                 $this->command->info('✓ Village Officer created: nonongan@desacantik.id / password123');
@@ -72,11 +72,11 @@ class UserSeeder extends Seeder
                 User::create([
                     'username' => 'perangkat_rindingbatu',
                     'email' => 'rindingbatu@desacantik.id',
-                    'password' => 'password123',
+                    'password' => 'password123', 
                     'full_name' => 'Perangkat Desa Rindingbatu',
                     'phone_number' => '081234567892',
                     'role_id' => $villageOfficerRole->id,
-                    'village_id' => $rindingbatu->id, // Pastikan pakai village_id
+                    'village_id' => $rindingbatu->id, 
                     'is_active' => true,
                 ]);
                 $this->command->info('✓ Village Officer created: rindingbatu@desacantik.id / password123');
