@@ -45,22 +45,22 @@ class Village extends Model
 
     public function publications(): HasMany
     {
-        return $this->hasMany(Publication::class, 'desa_id');
+        return $this->hasMany(Publication::class, 'village_id');
     }
 
     public function geospatialData(): HasMany
     {
-        return $this->hasMany(GeospatialData::class, 'desa_id');
+        return $this->hasMany(GeospatialData::class, 'village_id');
     }
 
     public function thematicMaps(): HasMany
     {
-        return $this->hasMany(ThematicMap::class, 'desa_id');
+        return $this->hasMany(ThematicMap::class, 'village_id');
     }
 
     public function modules(): HasMany
     {
-        return $this->hasMany(Module::class, 'desa_id');
+        return $this->hasMany(Module::class, 'village_id');
     }
 
     public function profile(): HasOne
@@ -78,7 +78,7 @@ class Village extends Model
         return $this->hasManyThrough(
             MapPoint::class,
             ThematicMap::class,
-            'desa_id',
+            'village_id',
             'thematic_map_id',
             'id',
             'id'

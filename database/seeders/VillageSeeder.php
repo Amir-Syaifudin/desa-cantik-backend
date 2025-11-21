@@ -12,8 +12,8 @@ class VillageSeeder extends Seeder
     {
         $villages = [
             [
-                'village_code' => '7316010001',
-                'name' => 'Nonongan Selatan',
+                'village_code' => '7316010001', // SUDAH BENAR (English)
+                'name' => 'Nonongan Selatan',   // SUDAH BENAR (English)
                 'kecamatan' => 'Rantepao',
                 'kabupaten' => 'Toraja Utara',
                 'provinsi' => 'Sulawesi Selatan',
@@ -23,6 +23,7 @@ class VillageSeeder extends Seeder
                 'updated_at' => now(),
                 'profile' => [
                     'deskripsi' => 'Desa Nonongan Selatan merupakan desa binaan dengan fokus pada pengembangan wisata adat.',
+                    // ... data profile lainnya biarkan saja ...
                     'foto_url' => 'https://placehold.co/800x600/a3e635/ffffff?text=Nonongan+Selatan',
                     'thumbnail_url' => 'https://placehold.co/600x400/a3e635/ffffff?text=Nonongan+Selatan',
                     'area' => 12.5,
@@ -38,8 +39,8 @@ class VillageSeeder extends Seeder
                 ],
             ],
             [
-                'village_code' => '7316010002',
-                'name' => 'Rindingbatu',
+                'village_code' => '7316010002', // SUDAH BENAR
+                'name' => 'Rindingbatu',        // SUDAH BENAR
                 'kecamatan' => 'Rantepao',
                 'kabupaten' => 'Toraja Utara',
                 'provinsi' => 'Sulawesi Selatan',
@@ -49,6 +50,7 @@ class VillageSeeder extends Seeder
                 'updated_at' => now(),
                 'profile' => [
                     'deskripsi' => 'Desa Rindingbatu dikenal dengan potensi budaya dan kerajinan bambu.',
+                    // ... data profile lainnya ...
                     'foto_url' => 'https://placehold.co/800x600/33A1E0/ffffff?text=Rindingbatu',
                     'thumbnail_url' => 'https://placehold.co/600x400/33A1E0/ffffff?text=Rindingbatu',
                     'area' => 10.3,
@@ -69,12 +71,14 @@ class VillageSeeder extends Seeder
             $profileData = $village['profile'] ?? null;
             unset($village['profile']);
 
+            // Gunakan 'village_code' untuk updateOrCreate
             $villageModel = Village::updateOrCreate(
-                ['village_code' => $village['village_code']],
+                ['village_code' => $village['village_code']], 
                 $village
             );
 
             if ($profileData) {
+                // Gunakan 'village_id' untuk relasi
                 $profileData['village_id'] = $villageModel->id;
                 $profileData['population_density'] = $profileData['population_density']
                     ?? ($profileData['area'] ? round($profileData['population'] / $profileData['area'], 2) : null);

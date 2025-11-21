@@ -14,8 +14,8 @@ return new class extends Migration
             $table->string('full_name', 150)->after('email');
             $table->string('phone_number', 20)->nullable()->after('full_name');
             $table->foreignId('role_id')->after('phone_number')->constrained('roles')->onDelete('restrict');
-            $table->foreignId('desa_id')->nullable()->after('role_id')->constrained('desa')->onDelete('set null');
-            $table->boolean('is_active')->default(true)->after('desa_id');
+            $table->foreignId('village_id')->nullable()->after('role_id')->constrained('villages')->onDelete('set null');
+            $table->boolean('is_active')->default(true)->after('village_id');
             $table->softDeletes()->after('updated_at');
         });
     }
@@ -24,13 +24,13 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['role_id']);
-            $table->dropForeign(['desa_id']);
+            $table->dropForeign(['village_id']);
             $table->dropColumn([
                 'username',
                 'full_name',
                 'phone_number',
                 'role_id',
-                'desa_id',
+                'village_id',
                 'is_active',
                 'deleted_at',
             ]);

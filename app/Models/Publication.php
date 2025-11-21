@@ -14,7 +14,7 @@ class Publication extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'desa_id',
+        'village_id',
         'title',
         'description',
         'file_path',
@@ -39,7 +39,7 @@ class Publication extends Model
 
     public function village(): BelongsTo
     {
-        return $this->belongsTo(Village::class, 'desa_id');
+        return $this->belongsTo(Village::class, 'village_id');
     }
 
     public function uploader(): BelongsTo

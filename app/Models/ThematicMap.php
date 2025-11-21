@@ -14,10 +14,11 @@ class ThematicMap extends Model
     protected $table = 'thematic_maps';
 
     protected $fillable = [
-        'desa_id',
+        'village_id',
         'map_name',
         'map_type',
         'description',
+        'geospatial_data_id',
         'layer_config',
         'is_active',
         'created_by',
@@ -28,9 +29,14 @@ class ThematicMap extends Model
         'is_active' => 'boolean',
     ];
 
+    public function geospatialData(): BelongsTo
+    {
+        return $this->belongsTo(GeospatialData::class, 'geospatial_data_id');
+    }
+    
     public function village(): BelongsTo
     {
-        return $this->belongsTo(Village::class, 'desa_id');
+        return $this->belongsTo(Village::class, 'village_id');
     }
 
     public function mapPoints(): HasMany

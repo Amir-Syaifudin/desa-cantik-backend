@@ -19,6 +19,7 @@ class ThematicMapController extends Controller
     {
         $village = Village::findOrFail($villageId);
 
+        // Pastikan kolom 'is_active' dan foreign key 'geospatial_data_id' diambil
         $maps = ThematicMap::where('desa_id', $village->id)
             ->with('mapPoints:id,thematic_map_id,name,latitude,longitude,category')
             ->get()
@@ -29,6 +30,10 @@ class ThematicMapController extends Controller
                     'theme_name' => $map->map_name,
                     'description' => $map->description,
                     'icon' => $map->map_type,
+                    // PENTING: Frontend butuh geo_id untuk menghubungkan layer dengan geometri
+                    // Pastikan kolom di DB bernama 'geospatial_data_id' atau sesuaikan jika 'geo_id'
+                    'geo_id' => $map->geospatial_data_id ?? $map->geo_id, 
+                    'is_visible' => (bool) $map->is_active, // Frontend butuh status visibility
                     'points_count' => $map->mapPoints->count(),
                     'created_at' => $map->created_at,
                     'updated_at' => $map->updated_at,
@@ -60,6 +65,8 @@ class ThematicMapController extends Controller
                 'theme_name' => $map->map_name,
                 'description' => $map->description,
                 'icon' => $map->map_type,
+                'geo_id' => $map->geospatial_data_id ?? $map->geo_id, // Tambahkan ini
+                'is_visible' => (bool) $map->is_active, // Tambahkan ini
                 'points' => $map->mapPoints->map(function ($point) {
                     return [
                         'id' => $point->id,
@@ -100,6 +107,8 @@ class ThematicMapController extends Controller
             'theme_name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'icon' => 'nullable|string|max:100',
+            'geospatial_data_id' => 'nullable|exists:geospatial_data,id', // Validasi Geo ID
+            'is_active' => 'sometimes|boolean'
         ]);
 
         if ($validator->fails()) {
@@ -115,7 +124,9 @@ class ThematicMapController extends Controller
             'map_name' => $request->theme_name,
             'description' => $request->description,
             'map_type' => $request->icon ?? 'default',
-            'is_active' => true,
+            // Simpan relasi ke geospatial data (Pastikan kolom ini ada di migration & fillable model)
+            'geospatial_data_id' => $request->geospatial_data_id, 
+            'is_active' => $request->input('is_active', true),
             'created_by' => $user->id,
         ]);
 
@@ -130,6 +141,8 @@ class ThematicMapController extends Controller
                 'theme_name' => $map->map_name,
                 'description' => $map->description,
                 'icon' => $map->map_type,
+                'geo_id' => $map->geospatial_data_id,
+                'is_visible' => $map->is_active,
             ],
         ], 201);
     }
@@ -157,6 +170,8 @@ class ThematicMapController extends Controller
             'theme_name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'icon' => 'nullable|string|max:100',
+            'geospatial_data_id' => 'nullable|exists:geospatial_data,id',
+            'is_active' => 'sometimes|boolean'
         ]);
 
         if ($validator->fails()) {
@@ -178,6 +193,12 @@ class ThematicMapController extends Controller
         if ($request->has('icon')) {
             $map->map_type = $request->icon;
         }
+        if ($request->has('geospatial_data_id')) {
+            $map->geospatial_data_id = $request->geospatial_data_id;
+        }
+        if ($request->has('is_active')) {
+            $map->is_active = $request->is_active;
+        }
 
         $map->save();
 
@@ -195,6 +216,8 @@ class ThematicMapController extends Controller
                 'theme_name' => $map->map_name,
                 'description' => $map->description,
                 'icon' => $map->map_type,
+                'geo_id' => $map->geospatial_data_id,
+                'is_visible' => $map->is_active,
             ],
         ]);
     }

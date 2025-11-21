@@ -70,7 +70,7 @@ class VillageStatisticController extends Controller
             ])
             ->with([
                 'statisticType:id,name,code,category,description,display_order',
-                'creator:id,full_name,name',
+                'creator:id,full_name', // PERBAIKAN: Hapus ',name'
             ])
             ->where('village_id', $village->id)
             ->when($request->filled('year'), fn ($query) => $query->where('year', $request->query('year')))
@@ -155,7 +155,7 @@ class VillageStatisticController extends Controller
 
         $statistic->load([
             'statisticType:id,name,code,category,description,display_order',
-            'creator:id,full_name,name',
+            'creator:id,full_name', // PERBAIKAN: Hapus ',name'
         ]);
 
         ActivityLogger::log(
@@ -186,8 +186,8 @@ class VillageStatisticController extends Controller
         $statistic->save();
         $statistic->load([
             'statisticType:id,name,code,category,description,display_order',
-            'creator:id,full_name,name',
-            'updater:id,full_name,name',
+            'creator:id,full_name', // PERBAIKAN: Hapus ',name'
+            'updater:id,full_name', // PERBAIKAN: Hapus ',name'
         ]);
 
         ActivityLogger::log(

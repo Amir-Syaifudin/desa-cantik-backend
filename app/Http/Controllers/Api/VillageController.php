@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Publication; // <--- PENTING: Import Model Publication
 use App\Models\Village;
 use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
@@ -59,7 +60,7 @@ class VillageController extends Controller
             ->select(['id', 'village_code', 'name', 'kecamatan', 'kabupaten', 'provinsi', 'logo_url', 'is_visible', 'created_at', 'updated_at']);
 
         // Filter by active status (default true for public)
-        $isVisible = $request->query('is_active', 'true'); // keep query name for backward compatibility
+        $isVisible = $request->query('is_active', 'true');
         if ($isVisible !== 'all') {
             $query->where('is_visible', filter_var($isVisible, FILTER_VALIDATE_BOOLEAN));
         }
@@ -320,6 +321,90 @@ class VillageController extends Controller
             ],
         ]);
     }
+
+    // --- START: METHOD BARU DOKUMENTASI (DIPERBAIKI) ---
+    #[OA\Get(
+        path: '/api/v1/villages/{id}/documentation',
+        summary: 'Get village documentation',
+        description: 'Returns a list of images including village profile image and publication images.',
+        tags: ['Villages'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                description: 'Village ID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer')
+            ),
+        ]
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Documentation images retrieved successfully'
+    )]
+    public function documentation($id): JsonResponse
+    {
+        $village = Village::with(['profile'])->find($id);
+
+        if (!$village) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Desa tidak ditemukan',
+            ], 404);
+        }
+
+        $images = [];
+
+        // 1. Ambil gambar utama desa (Profil/Logo)
+        $profile = $village->profile;
+        $mainImage = $profile?->thumbnail_url
+            ?? $profile?->logo_url
+            ?? $village->logo_url;
+
+        if ($mainImage) {
+            $images[] = [
+                'id' => 'profile-' . $village->id,
+                'type' => 'profile',
+                'title' => 'Profil Desa ' . $village->name,
+                'image_url' => $mainImage,
+                'created_at' => $village->created_at,
+            ];
+        }
+
+        // 2. Ambil Publikasi (Hanya yang berupa GAMBAR)
+        // Menggunakan kolom 'desa_id' (bukan village_id) dan memfilter file_type
+        $publications = Publication::where('desa_id', $id)
+            ->where(function($q) {
+                // Filter hanya file gambar
+                $q->where('file_type', 'LIKE', 'image/%')
+                  ->orWhere('file_name', 'LIKE', '%.jpg')
+                  ->orWhere('file_name', 'LIKE', '%.jpeg')
+                  ->orWhere('file_name', 'LIKE', '%.png');
+            })
+            ->latest()
+            ->get();
+
+        foreach ($publications as $pub) {
+            // Gunakan accessor download_url atau file_url legacy
+            $imageUrl = $pub->download_url ?? $pub->file_url;
+
+            if ($imageUrl) {
+                $images[] = [
+                    'id' => 'pub-' . $pub->id,
+                    'type' => 'publication',
+                    'title' => $pub->title,
+                    'image_url' => $imageUrl,
+                    'created_at' => $pub->created_at,
+                ];
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $images,
+        ]);
+    }
+    // --- END: METHOD BARU DOKUMENTASI ---
 
     protected function mapVillageToFrontendPayload(Village $village, bool $detailed = false): array
     {

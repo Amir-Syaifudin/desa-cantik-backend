@@ -14,10 +14,9 @@ class GeospatialData extends Model
 
     // Kolom yang bisa diisi (mass assignable)
     protected $fillable = [
-        'desa_id',
+        'village_id',
         'geometry_type',
         'geojson_data',
-        'properties',
         'description',
         'uploaded_by',
     ];
@@ -30,6 +29,6 @@ class GeospatialData extends Model
     // Relasi dengan tabel Village (relasi banyak ke satu)
     public function village()
     {
-        return $this->belongsTo(Village::class, 'desa_id');
+        return $this->belongsTo(Village::class, 'village_id');
     }
 }

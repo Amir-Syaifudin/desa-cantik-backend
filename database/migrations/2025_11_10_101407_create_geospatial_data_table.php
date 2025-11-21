@@ -10,10 +10,11 @@ return new class extends Migration
     {
         Schema::create('geospatial_data', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('desa_id')->constrained('desa')->onDelete('cascade');
+            $table->foreignId('village_id')->constrained('villages')->onDelete('cascade');
             $table->string('geometry_type', 50)->comment('Polygon / Point / LineString');
             $table->json('geojson_data')->comment('GeoJSON geometry data');
             $table->text('description')->nullable();
+            $table->json('properties')->nullable();
             $table->foreignId('uploaded_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });

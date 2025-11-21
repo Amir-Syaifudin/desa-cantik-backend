@@ -112,7 +112,7 @@ class GeospatialDataSeeder extends Seeder
             foreach ($geospatialTemplates as $template) {
                 GeospatialData::updateOrCreate(
                     [
-                        'desa_id' => $village->id,
+                        'village_id' => $village->id,
                         'description' => $template['description'],
                     ],
                     [

@@ -73,7 +73,7 @@ Backend API - Laravel 12 | PHP 8.2 | MySQL 8.0
 - **Language:** PHP 8.2.29
 - **Database:** MySQL 8.0
 - **Web Server:** Nginx Alpine
-- **Authentication:** JWT (tymon/jwt-auth)
+- **Authentication:** Laravel Sanctum (Bearer Token)
 - **API Documentation:** OpenAPI 3.0 (swagger-php attributes) — generated via `php artisan openapi:generate`
 - **Testing:** PHPUnit, Pest
 
@@ -95,13 +95,14 @@ Backend API - Laravel 12 | PHP 8.2 | MySQL 8.0
 ## Fitur Utama
 
 ### 1. Manajemen Pengguna & Autentikasi
-- Login dengan JWT Token
+- Login dengan Laravel Sanctum (Bearer Token)
 - Role-based Access Control (RBAC)
   - Admin BPS: Full access to all villages and admin functions
   - Perangkat Desa: Access only to their assigned village data
   - Guest (Public): Read-only access without authentication
-- Manajemen profil
-- Reset password
+- Manajemen profil pengguna
+- Reset password dengan token
+- Logout & logout all devices
 
 ### 2. Manajemen Data Desa
 - CRUD daftar desa
@@ -204,8 +205,28 @@ exit
 # Run database migrations
 docker-compose exec app php artisan migrate
 
-# Seed data dummy
+# Seed data dummy (includes test data)
 docker-compose exec app php artisan db:seed
+```
+
+**Seeder yang tersedia:**
+- `RoleSeeder` - Roles (bps_admin, village_officer)
+- `VillageSeeder` - Master data desa (Nonongan Selatan, Rindingbatu)
+- `StatisticTypeSeeder` - Master indikator statistik (10 jenis)
+- `UserSeeder` - User test credentials
+- `GeospatialDataSeeder` - Data geospasial (GeoJSON)
+- `ThematicMapSeeder` - Peta tematik per desa
+- `PublicationSeeder` - Publikasi dokumen (10 records)
+- `VillageStatisticSeeder` - Data statistik time-series (60 records)
+- `VillageModuleSeeder` - Aktivasi modul per desa (6 records)
+- `MapPointSeeder` - Titik peta tematik (20 records)
+
+**Jalankan seeder individual:**
+```bash
+docker-compose exec app php artisan db:seed --class=PublicationSeeder
+docker-compose exec app php artisan db:seed --class=VillageStatisticSeeder
+docker-compose exec app php artisan db:seed --class=VillageModuleSeeder
+docker-compose exec app php artisan db:seed --class=MapPointSeeder
 ```
 
 ### 6. Verify Installation
@@ -226,35 +247,71 @@ http://localhost:8000
 
 **Sukses!** Jika muncul Laravel welcome page, instalasi berhasil!
 
+### 8. Verify Database Seeding
+
+```bash
+# Cek data yang sudah terisi
+docker-compose exec mysql mysql -u desa_cantik_user -pDesaCantik2025! desa_cantik_db -e "SELECT 'Roles' as table_name, COUNT(*) as count FROM roles UNION ALL SELECT 'Villages', COUNT(*) FROM villages UNION ALL SELECT 'Users', COUNT(*) FROM users UNION ALL SELECT 'Publications', COUNT(*) FROM publications UNION ALL SELECT 'Village Statistics', COUNT(*) FROM village_statistics;"
+```
+
+**Expected output:**
+- Roles: 2
+- Villages: 2
+- Users: 3
+- Publications: 10
+- Village Statistics: 60
+- Village Modules: 6
+- Map Points: 20
+
 ---
 
 ## Struktur Database
 
-### Tabel Aplikasi (11 tabel)
+### Tabel Aplikasi (15 tabel)
 
 | Tabel                   | Deskripsi                                           | Relasi                                    |
 | ----------------------- | --------------------------------------------------- | ----------------------------------------- |
-| **user_roles**          | Role user (Pegawai BPS, Perangkat Desa, Masyarakat) | → users                                   |
-| **desa**                | Master data desa                                    | → users, desa_profiles, desa_modules, dll |
-| **users**               | Akun pengguna sistem                                | ← roles, ← desa                           |
-| **desa_profiles**       | Profil lengkap desa (1:1)                           | ← desa                                    |
-| **desa_modules**        | Aktivasi modul per desa                             | ← desa                                    |
-| **indicators**          | Master indikator statistik                          | → desa_indicator_data                     |
-| **desa_indicator_data** | Data statistik time-series                          | ← desa, ← indicators                      |
-| **publications**        | File publikasi PDF                                  | ← desa                                    |
-| **geospatial_data**     | GeoJSON boundary desa                               | ← desa                                    |
-| **thematic_maps**       | Layer peta tematik                                  | ← desa                                    |
-| **thematic_indicators** | Junction table (maps ↔ indicators)                  | ← thematic_maps, ← indicators             |
+| **roles**               | Role user (Pegawai BPS, Perangkat Desa)            | → users                                   |
+| **villages**            | Master data desa                                    | → users, village_profiles, village_modules, dll |
+| **users**               | Akun pengguna sistem                                | ← roles, ← villages                       |
+| **village_profiles**    | Profil lengkap desa (1:1)                           | ← villages                                |
+| **village_modules**     | Aktivasi modul per desa                             | ← villages                                |
+| **statistic_types**     | Master indikator statistik                          | → village_statistics                       |
+| **village_statistics**  | Data statistik time-series                          | ← villages, ← statistic_types             |
+| **publications**        | File publikasi PDF                                  | ← villages                                |
+| **geospatial_data**     | GeoJSON boundary desa                               | ← villages                                |
+| **thematic_maps**       | Layer peta tematik                                  | ← villages                                |
+| **map_points**          | Titik lokasi di peta tematik                        | ← thematic_maps                           |
+| **thematic_indicators** | Junction table (maps ↔ indicators)                  | ← thematic_maps, ← statistic_types        |
+| **activity_logs**       | Log aktivitas pengguna                               | ← users, ← villages                       |
+| **media**               | Media files (Spatie Media Library)                  | -                                         |
+| **password_reset_tokens** | Token reset password                              | ← users                                   |
 
 ### Tabel Laravel System (8 tabel)
 
 - `cache`, `cache_locks` - Cache storage
 - `sessions` - Session database driver
 - `jobs`, `job_batches`, `failed_jobs` - Queue system
-- `password_reset_tokens` - Password reset
 - `migrations` - Migration tracker
+- `personal_access_tokens` - Sanctum tokens
 
-**Total:** 19 tabel
+**Total:** 23 tabel
+
+### Data Test yang Tersedia
+
+Setelah menjalankan `php artisan db:seed`, database akan terisi dengan:
+
+- **2 Roles**: bps_admin, village_officer
+- **2 Villages**: Nonongan Selatan, Rindingbatu
+- **3 Users**: Admin BPS + 2 Perangkat Desa
+- **2 Village Profiles**: Profil lengkap per desa
+- **10 Statistic Types**: Indikator statistik (Populasi, UMKM, dll)
+- **60 Village Statistics**: Data statistik 3 tahun (2022-2024) × 10 jenis × 2 desa
+- **6 Geospatial Data**: GeoJSON per desa (Polygon, Point, LineString)
+- **6 Thematic Maps**: 3 peta per desa (Kepadatan Penduduk, Fasilitas Pendidikan, Fasilitas Kesehatan)
+- **20 Map Points**: Titik lokasi di peta tematik
+- **10 Publications**: Dokumen publikasi per desa
+- **6 Village Modules**: Modul aktif per desa
 
 ### Entity Relationship Diagram (ERD)
 
@@ -403,10 +460,33 @@ curl -o api-docs.yaml http://localhost:8000/api/documentation/yaml
 
 ### Postman Collection
 
-Download collection:
+Postman collection tersedia di:
 ```
 /docs/postman/Desa-Cantik-API.postman_collection.json
 ```
+
+**Note:** Collection akan dibuat untuk dokumentasi API endpoints lengkap.
+
+### API Endpoints Summary
+
+**Public Endpoints (No Auth Required):**
+- `GET /api/v1/villages` - List desa
+- `GET /api/v1/villages/{id}` - Detail desa
+- `GET /api/v1/villages/{id}/profile` - Profil desa
+- `GET /api/v1/villages/{id}/statistics` - Data statistik
+- `GET /api/v1/villages/{id}/publications` - Publikasi
+- `GET /api/v1/villages/{id}/geospatial` - Data geospasial
+- `GET /api/v1/villages/{id}/thematic-maps` - Peta tematik
+- `POST /api/v1/auth/register` - Register user baru
+- `POST /api/v1/auth/login` - Login
+
+**Protected Endpoints (Require Auth):**
+- `GET /api/v1/auth/user` - User profile
+- `PUT /api/v1/auth/profile` - Update profile
+- `POST /api/v1/villages/{id}/statistics` - Create statistik
+- `POST /api/v1/villages/{id}/publications` - Upload publikasi
+- `GET /api/v1/dashboard/admin` - Dashboard admin (BPS Admin only)
+- `GET /api/v1/dashboard/village` - Dashboard desa
 
 ---
 
@@ -576,8 +656,8 @@ desa-cantik-api/
 │   ├── Services/           # Business Logic
 │   └── Policies/           # Authorization
 ├── database/
-│   ├── migrations/         # Database migrations (15 files)
-│   ├── seeders/            # Database seeders (4 files)
+│   ├── migrations/         # Database migrations (32 files)
+│   ├── seeders/            # Database seeders (10 files)
 │   └── factories/          # Model factories
 ├── docker/
 │   ├── nginx/              # Nginx configuration
@@ -593,7 +673,10 @@ desa-cantik-api/
 ├── storage/                # Storage & logs
 ├── docker-compose.yml      # Docker orchestration
 ├── .env.example            # Environment template
-└── README.md               # This file
+├── docker-compose.yml       # Docker orchestration
+├── composer.json            # PHP dependencies
+├── phpunit.xml              # PHPUnit configuration
+└── README.md                # This file
 ```
 
 ---
@@ -608,13 +691,15 @@ Jika menemukan security issue, **JANGAN** buat public issue. Hubungi:
 - **Lead Backend Developer:** Alif Zakiansyah As Syauqi (222312958@stis.ac.id)
 
 ### Security Features
-- JWT Authentication dengan refresh token
+- Laravel Sanctum Authentication (Bearer Token)
 - Password hashing (bcrypt)
 - SQL Injection prevention (Eloquent ORM)
-- XSS protection (Laravel Sanitizer)
+- XSS protection (Laravel built-in)
 - CSRF protection
-- Rate limiting
-- CORS configuration  
+- Rate limiting (throttle middleware)
+- CORS configuration
+- Soft deletes untuk data sensitif
+- Activity logging untuk audit trail  
 
 ---
 

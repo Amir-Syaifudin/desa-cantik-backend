@@ -34,7 +34,7 @@ return new class extends Migration
                 $table->dropForeign(['village_id']);
                 $table->foreign('village_id')
                     ->references('id')
-                    ->on('desa')
+                    ->on('villages')
                     ->nullOnDelete();
             }
         });

@@ -36,8 +36,8 @@ class ActivityLogger
             return (int) $model->getAttribute('village_id');
         }
 
-        if ($model->getAttribute('desa_id')) {
-            return (int) $model->getAttribute('desa_id');
+        if ($model->getAttribute('village_id')) {
+            return (int) $model->getAttribute('village_id');
         }
 
         if (method_exists($model, 'village') && $model->relationLoaded('village')) {
